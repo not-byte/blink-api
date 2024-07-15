@@ -1,0 +1,27 @@
+{
+  "canisters": {
+    "pmessage_backend": {
+      "candid": "src/pmessage_backend/pmessage_backend.did",
+      "package": "pmessage_backend",
+      "type": "rust"
+    },
+    "pmessage_frontend": {
+      "dependencies": [
+        "pmessage_backend"
+      ],
+      "source": [
+        "src/pmessage_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "pmessage_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
