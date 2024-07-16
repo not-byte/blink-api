@@ -1,3 +1,19 @@
+type Message = record {
+    sender: principal;
+    receiver: principal;
+    content: text;
+    timestamp: nat64;
+};
+
+type PrincipalPair = record { principal; principal };
+type MessageMapEntry = record { PrincipalPair; vec Message };
+type MessageMap = vec MessageMapEntry;
+
 service : {
-    "greet": (text) -> (text) query;
+    send_message: (principal, text) -> ();
+    get_messages_with: (principal) -> (vec Message) query;
+    remove_message: (principal, nat64) -> ();
+    update_message: (principal, nat64, text) -> ();
+
+    get_all: () -> (MessageMap) query;
 }
