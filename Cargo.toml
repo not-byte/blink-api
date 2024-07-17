@@ -1,5 +1,5 @@
 [workspace]
 members = [
-    "src/pmessage_backend"
+    "src/blinxee_backend"
 ]
 resolver = "2"

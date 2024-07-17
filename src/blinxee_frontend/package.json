@@ -1,10 +1,10 @@
 {
-  "name": "pmessage_frontend",
+  "name": "blinxee_frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "setup": "npm i && dfx canister create pmessage_backend && dfx generate pmessage_backend && dfx deploy",
+    "setup": "npm i && dfx canister create blinxee_backend && dfx generate blinxee_backend && dfx deploy",
     "start": "vite --port 3000",
     "prebuild": "dfx generate",
     "build": "tsc && vite build",

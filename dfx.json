@@ -1,19 +1,19 @@
 {
   "canisters": {
-    "pmessage_backend": {
-      "candid": "src/pmessage_backend/pmessage_backend.did",
-      "package": "pmessage_backend",
+    "blinxee_backend": {
+      "candid": "src/blinxee_backend/blinxee_backend.did",
+      "package": "blinxee_backend",
       "type": "rust"
     },
-    "pmessage_frontend": {
+    "blinxee_frontend": {
       "dependencies": [
-        "pmessage_backend"
+        "blinxee_backend"
       ],
       "source": [
-        "src/pmessage_frontend/dist"
+        "src/blinxee_frontend/dist"
       ],
       "type": "assets",
-      "workspace": "pmessage_frontend"
+      "workspace": "blinxee_frontend"
     }
   },
   "defaults": {

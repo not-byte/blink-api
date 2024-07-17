@@ -1,13 +1,13 @@
 <script setup>
 import { ref } from 'vue';
-import { pmessage_backend } from 'declarations/pmessage_backend/index';
+import { blinxee_backend } from 'declarations/blinxee_backend/index';
 let greeting = ref('');
 
 async function handleSubmit(e) {
   e.preventDefault();
   const target = e.target;
   const name = target.querySelector('#name').value;
-  await pmessage_backend.greet(name).then((response) => {
+  await blinxee_backend.greet(name).then((response) => {
     greeting.value = response;
   });
 }
