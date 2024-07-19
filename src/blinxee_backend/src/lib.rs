@@ -1,5 +1,5 @@
 use candid::{CandidType, Deserialize, Principal};
-// use ic_cdk::trap;
+use ic_cdk::trap;
 use std::{cell::RefCell, collections::HashMap};
 
 // TODO: Add Image type
@@ -15,12 +15,11 @@ struct Message {
 
 type Conversation = Vec<Message>;
 
-#[derive(Default)]
+#[derive(Default, CandidType, Deserialize, Clone)]
 struct State {
     conversations: HashMap<(Principal, Principal), Conversation>,
 }
 
-// TODO: Implement ic-stable-structures
 thread_local! {
     static STATE: RefCell<State> = RefCell::new(State::default());
 }
@@ -62,30 +61,30 @@ fn get_messages_with(user: Principal) -> Conversation {
     })
 }
 
-// TODO: Add proper error handling
 #[ic_cdk::update]
 fn remove_message(receiver: Principal, id: u64) {
     let caller = ic_cdk::caller();
     STATE.with_borrow_mut(|state| {
         if let Some(conversation) = state.conversations.get_mut(&(caller, receiver)) {
-            let index = conversation.iter().position(|v| v.id == id).unwrap();
+            let Some(index) = conversation.iter().position(|v| v.id == id) else {
+                trap(r#"{"message": "Message not found"}"#);
+            };
             conversation.remove(index);
-            // trap(r#"{"message": "Message not found"}"#);
         }
     })
 }
 
-// TODO: Add proper error handling
 #[ic_cdk::update]
 fn update_message(receiver: Principal, id: u64, new_message: String) {
     let caller = ic_cdk::caller();
     STATE.with_borrow_mut(|state| {
         if let Some(conversation) = state.conversations.get_mut(&(caller, receiver)) {
-            let index = conversation.iter().position(|v| v.id == id).unwrap();
+            let Some(index) = conversation.iter().position(|v| v.id == id) else {
+                trap(r#"{"message": "Message not found"}"#);
+            };
             if let Some(v) = conversation.get_mut(index) {
                 v.content = new_message;
             }
-            // trap(r#"{"message": "Message not found"}"#);
         }
     })
 }
@@ -94,7 +93,7 @@ fn update_message(receiver: Principal, id: u64, new_message: String) {
 #[ic_cdk::pre_upgrade]
 fn pre_upgrade() {
     STATE.with_borrow(|state| {
-        ic_cdk::storage::stable_save((state.conversations.clone(),)).unwrap();
+        ic_cdk::storage::stable_save((state.clone(),)).unwrap();
     });
 }
 
@@ -102,10 +101,8 @@ fn pre_upgrade() {
 #[ic_cdk::post_upgrade]
 fn post_upgrade() {
     STATE.with_borrow_mut(|state| {
-        if let Ok((conversations,)) =
-            ic_cdk::storage::stable_restore::<(HashMap<(Principal, Principal), Conversation>,)>()
-        {
-            state.conversations = conversations;
+        if let Ok((new_state,)) = ic_cdk::storage::stable_restore::<(State,)>() {
+            *state = new_state;
         }
     });
 }
