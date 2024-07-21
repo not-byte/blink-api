@@ -1,4 +1,3 @@
-use candid::Principal;
 use messages::Message;
 use state::STATE;
 use std::collections::HashMap;
@@ -10,10 +9,11 @@ mod user;
 
 // NOTE: Remove in prod
 #[ic_cdk::query]
-fn get_all() -> HashMap<(Principal, Principal), Vec<Message>> {
-    let caller = ic_cdk::caller();
+fn get_all() -> HashMap<(User, User), Vec<Message>> {
+    // let caller = ic_cdk::caller();
     // ic_cdk::println!("{:#?}", caller);
-    STATE.with_borrow(|state| {
+    STATE.with_borrow_mut(|state| {
+        ic_cdk::println!("{:#?}", state.users);
         return state.conversations.clone();
     })
 }

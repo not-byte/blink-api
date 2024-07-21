@@ -1,11 +1,40 @@
+type Language = variant {
+    Polish;
+    English;
+};
+
+type Theme = variant {
+    Dark;
+    Light;
+    System;
+};
+
+type Status = variant {
+    Online;
+    Away;
+    DoNotDisturb;
+    Offline;
+};
+
+type User = record {
+    "principal": principal;
+    username: text;
+    password: text;
+    avatar: text;
+    language: Language;
+    theme: Theme;
+    status: Status;
+};
+
 type Message = record {
-    sender: principal;
+    id: nat64;
+    caller: principal;
     receiver: principal;
     content: text;
     timestamp: nat64;
 };
 
-type PrincipalPair = record { principal; principal };
+type PrincipalPair = record { User; User };
 type MessageMapEntry = record { PrincipalPair; vec Message };
 type MessageMap = vec MessageMapEntry;
 
@@ -14,6 +43,8 @@ service : {
     get_messages_with: (principal) -> (vec Message) query;
     remove_message: (principal, nat64) -> ();
     update_message: (principal, nat64, text) -> ();
+
+    add_user: () -> ();
 
     get_all: () -> (MessageMap) query;
 }

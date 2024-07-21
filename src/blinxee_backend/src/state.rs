@@ -3,17 +3,19 @@ use std::{cell::RefCell, collections::HashMap};
 use candid::CandidType;
 use serde::Deserialize;
 
-use crate::{Conversation, User};
+use crate::{messages::Conversation, User};
 
 #[derive(CandidType, Deserialize, Clone)]
 pub struct State {
     pub conversations: HashMap<(User, User), Conversation>,
+    pub users: Vec<User>,
 }
 
 impl State {
     fn new() -> Self {
         Self {
             conversations: HashMap::default(),
+            users: Vec::new(),
         }
     }
 }
