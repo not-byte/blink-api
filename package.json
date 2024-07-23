@@ -14,5 +14,8 @@
   "type": "module",
   "workspaces": [
     "src/blinxee_frontend"
-  ]
+  ],
+  "dependencies": {
+    "@dfinity/auth-client": "^2.0.0"
+  }
 }
