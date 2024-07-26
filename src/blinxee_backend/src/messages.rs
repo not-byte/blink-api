@@ -6,11 +6,28 @@ use crate::{state::STATE, user::UserTrait};
 
 // NOTE: Id can be changed to uuid
 #[derive(CandidType, Deserialize, Clone)]
-pub struct Message {
-    id: u64,
+pub struct Text {
     caller: Principal,
     receiver: Principal,
     content: String,
+}
+
+#[derive(CandidType, Deserialize, Clone)]
+pub struct Image {
+    name: String,
+    src: String,
+}
+
+#[derive(CandidType, Deserialize, Clone)]
+pub enum MessageContent {
+    Text(Text),
+    Image(Image),
+}
+
+#[derive(CandidType, Deserialize, Clone)]
+pub struct Message {
+    id: u64,
+    message: MessageContent,
     timestamp: u64,
 }
 
@@ -25,9 +42,39 @@ fn send_message(receiver: Principal, content: String) {
         // TODO: Add proper id selection
         let message = Message {
             id: 0,
-            caller,
-            receiver,
-            content,
+            message: MessageContent::Text(Text {
+                caller,
+                receiver,
+                content,
+            }),
+            timestamp,
+        };
+
+        let (Some(caller), Some(receiver)) = (
+            caller.to_user_state(state.to_owned()),
+            receiver.to_user_state(state.to_owned()),
+        ) else {
+            trap(r#"{"message": "User not found"}"#);
+        };
+
+        state
+            .conversations
+            .entry((caller, receiver))
+            .or_default()
+            .push(message);
+    })
+}
+
+#[ic_cdk::update]
+fn send_image(receiver: Principal, image: String, name: String) {
+    let caller = ic_cdk::caller();
+    let timestamp = ic_cdk::api::time() / 1_000_000;
+
+    STATE.with_borrow_mut(|state| {
+        // TODO: Add proper id selection
+        let message = Message {
+            id: 0,
+            message: MessageContent::Image(Image { src: image, name }),
             timestamp,
         };
 
@@ -79,7 +126,10 @@ fn update_message(receiver: Principal, id: u64, new_message: String) {
         };
 
         if let Some(v) = conversation.get_mut(index) {
-            v.content = new_message.clone();
+            match v.message {
+                MessageContent::Text(ref mut v) => v.content = new_message.clone(),
+                _ => trap(r#"{"message": "You can only edit a text message"}"#),
+            }
         }
     });
 

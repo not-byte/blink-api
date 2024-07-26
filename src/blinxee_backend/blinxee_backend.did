@@ -26,11 +26,25 @@ type User = record {
     status: Status;
 };
 
-type Message = record {
-    id: nat64;
+type Text = record {
     caller: principal;
     receiver: principal;
     content: text;
+};
+
+type Image = record {
+    name: text;
+    src: text;
+};
+
+type MessageContent = variant {
+    Text: Text;
+    Image: Image;
+};
+
+type Message = record {
+    id: nat64;
+    message: MessageContent;
     timestamp: nat64;
 };
 
@@ -40,6 +54,7 @@ type MessageMap = vec MessageMapEntry;
 
 service : {
     send_message: (principal, text) -> ();
+    send_image: (principal, text, text) -> ();
     get_messages_with: (principal) -> (vec Message) query;
     remove_message: (principal, nat64) -> ();
     update_message: (principal, nat64, text) -> ();
