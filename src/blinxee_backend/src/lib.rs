@@ -1,7 +1,6 @@
 use messages::Message;
 use state::STATE;
 use std::collections::HashMap;
-use candid::Principal;
 use user::User;
 
 mod messages;
@@ -9,8 +8,9 @@ mod state;
 mod user;
 
 #[ic_cdk::query]
-fn greet(principal: Principal, name: String) -> String {
-    format!("Hello, {} Your PrincipalId is: {}", name, principal)
+fn greet() -> String {
+    let caller = ic_cdk::caller();
+    format!("Your PrincipalId is: {}", caller)
 }
 
 // NOTE: Remove in prod

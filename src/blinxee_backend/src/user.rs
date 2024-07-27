@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use candid::{CandidType, Principal};
 use ic_cdk::trap;
 use serde::Deserialize;
@@ -76,14 +74,14 @@ fn add_user() {
         });
 
         // TODO: Remove
-        state.users.push(User {
-            principal: Principal::from_str("aaaaa-aa").unwrap(),
-            username: "User2".to_string(),
-            password: "1234".to_string(),
-            avatar: "".to_string(),
-            language: Language::English,
-            theme: Theme::System,
-            status: Status::Offline,
-        });
+        // state.users.push(User {
+        //     principal: Principal::from_str("aaaaa-aa").unwrap(),
+        //     username: "User2".to_string(),
+        //     password: "1234".to_string(),
+        //     avatar: "".to_string(),
+        //     language: Language::English,
+        //     theme: Theme::System,
+        //     status: Status::Offline,
+        // });
     })
 }

@@ -62,4 +62,5 @@ service : {
     add_user: () -> ();
 
     get_all: () -> (MessageMap) query;
+    greet: () -> (text) query;
 }
