@@ -1,19 +1,19 @@
 {
   "canisters": {
-    "blinxee_backend": {
-      "candid": "src/blinxee_backend/blinxee_backend.did",
-      "package": "blinxee_backend",
+    "blink_backend": {
+      "candid": "src/blink_backend/blink_backend.did",
+      "package": "blink_backend",
       "type": "rust"
     },
-    "blinxee_frontend": {
+    "blink_frontend": {
       "dependencies": [
-        "blinxee_backend"
+        "blink_backend"
       ],
       "source": [
-        "src/blinxee_frontend/dist"
+        "src/blink_frontend/dist"
       ],
       "type": "assets",
-      "workspace": "blinxee_frontend"
+      "workspace": "blink_frontend"
     }
   },
   "defaults": {

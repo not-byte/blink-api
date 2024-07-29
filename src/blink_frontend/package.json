@@ -1,10 +1,10 @@
 {
-  "name": "blinxee_frontend",
+  "name": "blink_frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "setup": "npm i && dfx canister create blinxee_backend && dfx generate blinxee_backend && dfx deploy",
+    "setup": "npm i && dfx canister create blink_backend && dfx generate blink_backend && dfx deploy",
     "start": "vite --port 3000",
     "prebuild": "dfx generate",
     "build": "tsc && vite build",

@@ -1,5 +1,5 @@
 [workspace]
 members = [
-    "src/blinxee_backend"
+    "src/blink_backend"
 ]
 resolver = "2"

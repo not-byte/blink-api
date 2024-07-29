@@ -44,7 +44,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "blinxee_backend"
+name = "blink_backend"
 version = "0.1.0"
 dependencies = [
  "candid",

@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
-import { blinxee_backend, canisterId, idlFactory } from "../../declarations/blinxee_backend/index";
+import { blink_backend, canisterId, idlFactory, createActor } from "../../declarations/blink_backend/index";
 let authClient: AuthClient | null = null;
 
 // async function handleSubmit(e: any) {
 //   e.preventDefault();
 //   const target = e.target;
 //   const name = target.querySelector("#name").value;
-//   await blinxee_backend.greet(name).then((response: string) => {
+//   await blink_backend.greet(name).then((response: string) => {
 //     greeting.value = response;
 //   });
 // }
 
 async function testFn(e: any) {
-  let a = await blinxee_backend.greet();
+  let a = await blink_backend.greet();
   console.log(a);
 }
 
@@ -27,10 +27,24 @@ async function bootstrap() {
   });
 }
 
-async function handleSuccess() {
-  const principalId = authClient?.getIdentity().getPrincipal().toText();
+// let actor = createActor(canisterId, {
+//   agent: await HttpAgent.create({ identity }),
+// })
 
-  document.getElementById("principalId")!.innerText = `Your PrincipalId: ${principalId}`;
+async function handleSuccess() {
+  const principalId = authClient?.getIdentity().getPrincipal()!;
+
+  document.getElementById("principalId")!.innerText = `Your PrincipalId: ${principalId.toText()} - ${principalId.isAnonymous()}`;
+  const identity = authClient?.getIdentity();
+  const agent = await HttpAgent.create({ identity });
+
+  await agent.fetchRootKey();
+
+  const actor = Actor.createActor(idlFactory, { agent, canisterId });
+
+  Actor.agentOf(actor)!.replaceIdentity!(authClient?.getIdentity()!);
+  let princ = await Actor.agentOf(actor)?.getPrincipal();
+  console.log(princ?.isAnonymous(), princ?.toText());
 }
 
 async function logIn() {
@@ -48,14 +62,6 @@ async function logIn() {
       toolbar=0,location=0,menubar=0,width=525,height=705
     `,
   });
-
-  const identity = authClient?.getIdentity();
-  const actor = Actor.createActor(idlFactory, {
-    agent: await HttpAgent.create({ identity }),
-    canisterId,
-  });
-
-  Actor.agentOf(actor)!.replaceIdentity!(authClient?.getIdentity()!);
 }
 bootstrap();
 </script>
