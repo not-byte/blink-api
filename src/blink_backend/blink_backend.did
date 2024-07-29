@@ -59,7 +59,7 @@ service : {
     remove_message: (principal, nat64) -> ();
     update_message: (principal, nat64, text) -> ();
 
-    add_user: () -> ();
+    add_user: (text, opt text) -> ();
 
     get_all: () -> (MessageMap) query;
     greet: () -> (text) query;

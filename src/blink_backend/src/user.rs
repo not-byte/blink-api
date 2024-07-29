@@ -29,8 +29,7 @@ pub enum Status {
 pub struct User {
     pub principal: Principal,
     pub username: String,
-    pub password: String,
-    pub avatar: String,
+    pub avatar: Option<String>,
     pub language: Language,
     pub theme: Theme,
     pub status: Status,
@@ -56,7 +55,7 @@ impl UserTrait for Principal {
 }
 
 #[ic_cdk::update]
-fn add_user() {
+fn add_user(username: String, avatar: Option<String>) {
     let caller = ic_cdk::caller();
     STATE.with_borrow_mut(|state| {
         if caller.to_user_state(state.to_owned()).is_some() {
@@ -65,10 +64,9 @@ fn add_user() {
 
         state.users.push(User {
             principal: caller,
-            username: "User1".to_string(),
-            password: "1234".to_string(),
-            avatar: "".to_string(),
-            language: Language::Polish,
+            username,
+            avatar,
+            language: Language::English,
             theme: Theme::Dark,
             status: Status::Online,
         });
@@ -77,8 +75,7 @@ fn add_user() {
         // state.users.push(User {
         //     principal: Principal::from_str("aaaaa-aa").unwrap(),
         //     username: "User2".to_string(),
-        //     password: "1234".to_string(),
-        //     avatar: "".to_string(),
+        //     avatar: None,
         //     language: Language::English,
         //     theme: Theme::System,
         //     status: Status::Offline,
