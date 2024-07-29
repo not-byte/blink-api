@@ -7,8 +7,6 @@ use crate::{state::STATE, user::UserTrait};
 // NOTE: Id can be changed to uuid
 #[derive(CandidType, Deserialize, Clone)]
 pub struct Text {
-    caller: Principal,
-    receiver: Principal,
     content: String,
 }
 
@@ -28,6 +26,8 @@ pub enum MessageContent {
 pub struct Message {
     id: u64,
     message: MessageContent,
+    caller: Principal,
+    receiver: Principal,
     timestamp: u64,
 }
 
@@ -42,11 +42,9 @@ fn send_message(receiver: Principal, content: String) {
         // TODO: Add proper id selection
         let message = Message {
             id: 0,
-            message: MessageContent::Text(Text {
-                caller,
-                receiver,
-                content,
-            }),
+            message: MessageContent::Text(Text { content }),
+            caller,
+            receiver,
             timestamp,
         };
 
@@ -75,6 +73,8 @@ fn send_image(receiver: Principal, image: String, name: String) {
         let message = Message {
             id: 0,
             message: MessageContent::Image(Image { src: image, name }),
+            caller,
+            receiver,
             timestamp,
         };
 
@@ -143,21 +143,24 @@ fn get_conversation(caller: Principal, receiver: Principal) -> Option<Conversati
         return None;
     };
 
+    let mut total_conversation = Vec::new();
+
     STATE.with_borrow(|state| {
         if let Some(conversation) = state
             .conversations
             .get(&(caller.clone(), receiver.clone()))
             .cloned()
         {
-            return Some(conversation);
+            total_conversation.extend(conversation)
         }
 
         if let Some(conversation) = state.conversations.get(&(receiver, caller)).cloned() {
-            return Some(conversation);
+            total_conversation.extend(conversation)
         }
+    });
 
-        None
-    })
+    total_conversation.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+    Some(total_conversation)
 }
 
 fn get_conversation_mut<F, R>(caller: Principal, receiver: Principal, mut f: F) -> Option<R>

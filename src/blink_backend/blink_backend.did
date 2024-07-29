@@ -27,8 +27,6 @@ type User = record {
 };
 
 type Text = record {
-    caller: principal;
-    receiver: principal;
     content: text;
 };
 
@@ -45,6 +43,8 @@ type MessageContent = variant {
 type Message = record {
     id: nat64;
     message: MessageContent;
+    caller: principal;
+    receiver: principal;
     timestamp: nat64;
 };
 
