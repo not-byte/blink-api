@@ -5,24 +5,26 @@ use serde::Deserialize;
 use crate::{anon, state::STATE, user::UserTrait, utils::CallerTrait};
 
 // NOTE: Id can be changed to uuid
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct Text {
     content: String,
 }
 
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct Image {
     name: String,
     src: String,
 }
 
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize, Clone, Debug)]
+// For Some reason this doesn't work
+// #[serde(tag = "type", content = "data")]
 pub enum MessageContent {
     Text(Text),
     Image(Image),
 }
 
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct Message {
     id: u64,
     message: MessageContent,
@@ -31,6 +33,14 @@ pub struct Message {
     timestamp: u64,
 }
 
+// NOTE: Conversation could be a type in which users are in array which would
+// automaticaly implement group chats and maybe simplify getting users
+// and could allow for chat customization
+// Ex:
+// struct Conversation {
+//     users: Vec<Principal>,
+//     messages: Vec<Message>,
+// }
 pub type Conversation = Vec<Message>;
 
 #[ic_cdk::update]

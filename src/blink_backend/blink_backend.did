@@ -19,7 +19,6 @@ type Status = variant {
 type User = record {
     "principal": principal;
     username: text;
-    password: text;
     avatar: text;
     language: Language;
     theme: Theme;
@@ -48,10 +47,6 @@ type Message = record {
     timestamp: nat64;
 };
 
-type PrincipalPair = record { User; User };
-type MessageMapEntry = record { PrincipalPair; vec Message };
-type MessageMap = vec MessageMapEntry;
-
 service : {
     send_message: (principal, text) -> ();
     send_image: (principal, text, text) -> ();
@@ -59,8 +54,12 @@ service : {
     remove_message: (principal, nat64) -> ();
     update_message: (principal, nat64, text) -> ();
 
+    get_user: () -> (User) query;
     add_user: (text, opt text) -> ();
+    update_user: (opt text, opt text, opt Language, opt Theme, opt Status) -> ();
 
-    get_all: () -> (MessageMap) query;
     greet: () -> (text) query;
+
+    // Remove in prod
+    get_all: () -> (vec record { record { User; User }; vec Message }) query;
 }

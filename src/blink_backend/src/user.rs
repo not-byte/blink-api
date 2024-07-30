@@ -1,4 +1,4 @@
-use crate::utils::CallerTrait;
+use crate::{update_if_some, utils::CallerTrait};
 use candid::{CandidType, Principal};
 use ic_cdk::trap;
 use serde::Deserialize;
@@ -40,13 +40,37 @@ pub struct User {
 }
 
 pub trait UserTrait {
+    /// Get the user from state
     fn to_user(&self) -> Option<User>;
+
+    /// Get the user from state
+    fn to_user_mut(&self) -> Option<&mut User>;
+
+    /// Get the user with state already provided
     fn to_user_state(&self, state: State) -> Option<User>;
 }
 
 impl UserTrait for Principal {
     fn to_user(&self) -> Option<User> {
         STATE.with_borrow(|v| v.users.iter().find(|user| user.principal == *self).cloned())
+    }
+
+    fn to_user_mut(&self) -> Option<&mut User> {
+        STATE.with(|state| {
+            // Use unsafe to extend the lifetime of the mutable reference
+            // This is safe because we know that the `RefCell` guarantees the borrow rules
+            // and the closure passed to `with` ensures the borrows don't escape
+            let mut state = state.borrow_mut();
+            let users_ptr = state.users.as_mut_ptr();
+
+            for i in 0..state.users.len() {
+                let user = unsafe { &mut *users_ptr.add(i) };
+                if user.principal == *self {
+                    return Some(user);
+                }
+            }
+            None
+        })
     }
 
     fn to_user_state(&self, state: State) -> Option<User> {
@@ -75,4 +99,29 @@ fn add_user(username: String, avatar: Option<String>) {
             status: Status::Online,
         });
     })
+}
+
+#[ic_cdk::query]
+fn get_user() -> Option<User> {
+    anon!().to_user()
+}
+
+#[ic_cdk::update]
+fn update_user(
+    username: Option<String>,
+    avatar: Option<String>,
+    language: Option<Language>,
+    theme: Option<Theme>,
+    status: Option<Status>,
+) {
+    let caller = anon!();
+    let Some(user) = caller.to_user_mut() else {
+        trap(r#"{"message": "User not found"}"#);
+    };
+
+    update_if_some!(user.username, username);
+    update_if_some!(user.avatar, Some(avatar));
+    update_if_some!(user.language, language);
+    update_if_some!(user.theme, theme);
+    update_if_some!(user.status, status);
 }

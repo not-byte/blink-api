@@ -1,6 +1,7 @@
 use candid::Principal;
 
 pub trait CallerTrait {
+    /// Shortcut for comparing Principals
     fn is_anonymous(&self) -> bool;
 }
 
@@ -19,4 +20,13 @@ macro_rules! anon {
         }
         caller
     }};
+}
+
+#[macro_export]
+macro_rules! update_if_some {
+    ($target:expr, $option:expr) => {
+        if let Some(v) = $option {
+            $target = v;
+        }
+    };
 }
