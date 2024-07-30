@@ -6,18 +6,18 @@ use crate::{
     anon,
     conversation::Conversation,
     state::STATE,
-    utils::{CallerTrait, Conversations},
+    utils::{CallerTrait, Filter},
 };
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct Text {
-    content: String,
+    pub content: String,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct Image {
-    name: String,
-    src: String,
+    pub name: String,
+    pub src: String,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
@@ -28,17 +28,17 @@ pub enum MessageContent {
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct Message {
-    id: u64,
-    message: MessageContent,
-    caller: Principal,
-    timestamp: u64,
+    pub id: u64,
+    pub message: MessageContent,
+    pub caller: Principal,
+    pub timestamp: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct LastMessage {
-    content: String,
-    timestamp: u64,
-    user: Principal,
+    pub content: String,
+    pub timestamp: u64,
+    pub user: Principal,
 }
 
 #[ic_cdk::update]
@@ -47,16 +47,19 @@ fn send_message(conversation_id: u64, content: String) {
     let timestamp = ic_cdk::api::time() / 1_000_000;
 
     STATE.with_borrow_mut(|state| {
-        // TODO: Add proper id selection
+        let Some(conversation) = state.conversations.find(conversation_id) else {
+            trap(r#"{"message": "Conversation not found"}"#);
+        };
+
+        if !conversation.users.contains(&caller) {
+            trap(r#"{"message": "User not in conversation"}"#);
+        }
+
         let message = Message {
-            id: 0,
+            id: conversation.messages.get_last_id() + 1,
             message: MessageContent::Text(Text { content }),
             caller,
             timestamp,
-        };
-
-        let Some(conversation) = state.conversations.find(conversation_id) else {
-            trap(r#"{"message": "Conversation not found"}"#);
         };
 
         conversation.messages.push(message);
@@ -69,16 +72,19 @@ fn send_image(conversation_id: u64, image: String, name: String) {
     let timestamp = ic_cdk::api::time() / 1_000_000;
 
     STATE.with_borrow_mut(|state| {
-        // TODO: Add proper id selection
+        let Some(conversation) = state.conversations.find(conversation_id) else {
+            trap(r#"{"message": "Conversation not found"}"#);
+        };
+
+        if !conversation.users.contains(&caller) {
+            trap(r#"{"message": "User not in conversation"}"#);
+        }
+
         let message = Message {
-            id: 0,
+            id: conversation.messages.get_last_id() + 1,
             message: MessageContent::Image(Image { src: image, name }),
             caller,
             timestamp,
-        };
-
-        let Some(conversation) = state.conversations.find(conversation_id) else {
-            trap(r#"{"message": "Conversation not found"}"#);
         };
 
         conversation.messages.push(message);

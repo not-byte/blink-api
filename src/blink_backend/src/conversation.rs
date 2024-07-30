@@ -3,7 +3,7 @@ use ic_cdk::trap;
 use serde::Deserialize;
 
 use crate::{
-    anon, messages::Message, state::STATE, update_if_some, user::UserTrait, utils::Conversations,
+    anon, messages::Message, state::STATE, update_if_some, user::UserTrait, utils::Filter,
     CallerTrait,
 };
 
@@ -28,8 +28,10 @@ impl Conversation {
 }
 
 #[ic_cdk::update]
-fn create_conversation(users: Vec<Principal>) {
+fn create_conversation(users_: Vec<Principal>) {
     let caller = anon!();
+    let mut users = vec![caller];
+    users.extend(users_);
     STATE.with_borrow_mut(|state| {
         let name = if users.len() == 2 {
             users
@@ -37,19 +39,23 @@ fn create_conversation(users: Vec<Principal>) {
                 .find(|&&v| v != caller)
                 .unwrap()
                 .to_user_state(state.to_owned())
-                .unwrap()
+                .unwrap_or_else(|| trap(r#"{"message": "User does not exists"}"#))
                 .username
         } else {
             users
                 .iter()
                 .take(3)
-                .map(|v| v.to_user_state(state.to_owned()).unwrap().username)
+                .map(|v| {
+                    v.to_user_state(state.to_owned())
+                        .unwrap_or_else(|| trap(r#"{"message": "User does not exists"}"#))
+                        .username
+                })
                 .collect::<Vec<String>>()
                 .join(", ")
         };
 
         state.conversations.push(Conversation::new(
-            state.conversations.get_last_id(),
+            state.conversations.get_last_id() + 1,
             users,
             name,
         ));
