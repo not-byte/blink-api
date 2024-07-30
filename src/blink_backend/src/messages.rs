@@ -2,7 +2,7 @@ use candid::{CandidType, Principal};
 use ic_cdk::trap;
 use serde::Deserialize;
 
-use crate::{state::STATE, user::UserTrait};
+use crate::{anon, state::STATE, user::UserTrait, utils::CallerTrait};
 
 // NOTE: Id can be changed to uuid
 #[derive(CandidType, Deserialize, Clone)]
@@ -35,7 +35,7 @@ pub type Conversation = Vec<Message>;
 
 #[ic_cdk::update]
 fn send_message(receiver: Principal, content: String) {
-    let caller = ic_cdk::caller();
+    let caller = anon!();
     let timestamp = ic_cdk::api::time() / 1_000_000;
 
     STATE.with_borrow_mut(|state| {
@@ -65,7 +65,7 @@ fn send_message(receiver: Principal, content: String) {
 
 #[ic_cdk::update]
 fn send_image(receiver: Principal, image: String, name: String) {
-    let caller = ic_cdk::caller();
+    let caller = anon!();
     let timestamp = ic_cdk::api::time() / 1_000_000;
 
     STATE.with_borrow_mut(|state| {
@@ -95,7 +95,7 @@ fn send_image(receiver: Principal, image: String, name: String) {
 
 #[ic_cdk::query]
 fn get_messages_with(receiver: Principal) -> Conversation {
-    let caller = ic_cdk::caller();
+    let caller = anon!();
     let Some(conversation) = get_conversation(caller, receiver) else {
         trap(r#"{"message": "Conversation not found"}"#);
     };
@@ -104,7 +104,7 @@ fn get_messages_with(receiver: Principal) -> Conversation {
 
 #[ic_cdk::update]
 fn remove_message(receiver: Principal, id: u64) {
-    let caller = ic_cdk::caller();
+    let caller = anon!();
     let res = get_conversation_mut(caller, receiver, |conversation| {
         let Some(index) = conversation.iter().position(|v| v.id == id) else {
             trap(r#"{"message": "Message not found"}"#);
@@ -119,7 +119,7 @@ fn remove_message(receiver: Principal, id: u64) {
 
 #[ic_cdk::update]
 fn update_message(receiver: Principal, id: u64, new_message: String) {
-    let caller = ic_cdk::caller();
+    let caller = anon!();
     let res = get_conversation_mut(caller, receiver, |conversation| {
         let Some(index) = conversation.iter().position(|v| v.id == id) else {
             trap(r#"{"message": "Message not found"}"#);

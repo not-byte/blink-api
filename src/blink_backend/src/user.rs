@@ -1,8 +1,12 @@
+use crate::utils::CallerTrait;
 use candid::{CandidType, Principal};
 use ic_cdk::trap;
 use serde::Deserialize;
 
-use crate::state::{State, STATE};
+use crate::{
+    anon,
+    state::{State, STATE},
+};
 
 #[derive(CandidType, Deserialize, Clone, Hash, PartialEq, Eq, Debug)]
 pub enum Language {
@@ -56,7 +60,7 @@ impl UserTrait for Principal {
 
 #[ic_cdk::update]
 fn add_user(username: String, avatar: Option<String>) {
-    let caller = ic_cdk::caller();
+    let caller = anon!();
     STATE.with_borrow_mut(|state| {
         if caller.to_user_state(state.to_owned()).is_some() {
             trap(r#"{"message": "User already exists"}"#);
@@ -70,15 +74,5 @@ fn add_user(username: String, avatar: Option<String>) {
             theme: Theme::Dark,
             status: Status::Online,
         });
-
-        // TODO: Remove
-        // state.users.push(User {
-        //     principal: Principal::from_str("aaaaa-aa").unwrap(),
-        //     username: "User2".to_string(),
-        //     avatar: None,
-        //     language: Language::English,
-        //     theme: Theme::System,
-        //     status: Status::Offline,
-        // });
     })
 }

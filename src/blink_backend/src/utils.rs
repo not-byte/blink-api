@@ -9,3 +9,14 @@ impl CallerTrait for Principal {
         *self == Principal::anonymous()
     }
 }
+
+#[macro_export]
+macro_rules! anon {
+    () => {{
+        let caller = ic_cdk::caller();
+        if caller.is_anonymous() {
+            trap(r#"{"message": "User is anonymous"}"#);
+        }
+        caller
+    }};
+}
