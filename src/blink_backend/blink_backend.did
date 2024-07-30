@@ -64,7 +64,7 @@ service : {
     remove_conversation: (nat64) -> ();
     join_conversation: (nat64) -> ();
     leave_conversation: (nat64) -> ();
-    get_user_converstaions: () -> () query;
+    get_user_conversations: () -> () query;
 
     send_message: (nat64, text) -> ();
     send_image: (nat64, text, text) -> ();
