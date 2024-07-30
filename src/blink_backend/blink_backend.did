@@ -47,19 +47,38 @@ type Message = record {
     timestamp: nat64;
 };
 
-service : {
-    send_message: (principal, text) -> ();
-    send_image: (principal, text, text) -> ();
-    get_messages_with: (principal) -> (vec Message) query;
-    remove_message: (principal, nat64) -> ();
-    update_message: (principal, nat64, text) -> ();
+type LastMessage = record {
+    content: text;
+    timestamp: nat64;
+    user: principal;
+}
 
-    get_user: () -> (User) query;
+type Conversation = record {
+    id: nat64;
+    users: vec principal;
+    messages: vec Message;
+};
+
+service : {
+    create_conversation: (vec principal) -> ();
+    remove_conversation: (nat64) -> ();
+    join_conversation: (nat64) -> ();
+    leave_conversation: (nat64) -> ();
+    get_user_converstaions: () -> () query;
+
+    send_message: (nat64, text) -> ();
+    send_image: (nat64, text, text) -> ();
+    get_messages: (nat64) -> (Conversation) query;
+    remove_message: (nat64, nat64) -> ();
+    update_message: (nat64, nat64, text) -> ();
+    get_last_message(nat64) -> (opt LastMessage) query;
+
+    get_user: () -> (opt User) query;
     add_user: (text, opt text) -> ();
     update_user: (opt text, opt text, opt Language, opt Theme, opt Status) -> ();
 
     greet: () -> (text) query;
 
     // Remove in prod
-    get_all: () -> (vec record { record { User; User }; vec Message }) query;
+    get_all: () -> (vec Conversation) query;
 }

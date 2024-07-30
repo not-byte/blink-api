@@ -1,5 +1,7 @@
 use candid::Principal;
 
+use crate::conversation::Conversation;
+
 pub trait CallerTrait {
     /// Shortcut for comparing Principals
     fn is_anonymous(&self) -> bool;
@@ -8,6 +10,29 @@ pub trait CallerTrait {
 impl CallerTrait for Principal {
     fn is_anonymous(&self) -> bool {
         *self == Principal::anonymous()
+    }
+}
+
+pub trait Conversations {
+    fn find(&mut self, conversation_id: u64) -> Option<&mut Conversation>;
+    fn filter(&self, caller: Principal) -> Vec<Conversation>;
+    fn get_last_id(&self) -> u64;
+}
+
+impl Conversations for Vec<Conversation> {
+    fn find(&mut self, conversation_id: u64) -> Option<&mut Conversation> {
+        self.iter_mut().find(|v| v.id == conversation_id)
+    }
+
+    fn filter(&self, caller: Principal) -> Vec<Conversation> {
+        self.iter()
+            .filter(|v| v.users.contains(&caller))
+            .cloned()
+            .collect()
+    }
+
+    fn get_last_id(&self) -> u64 {
+        self.iter().map(|v| v.id).max().unwrap_or(0)
     }
 }
 

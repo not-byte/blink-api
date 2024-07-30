@@ -1,10 +1,10 @@
+use conversation::Conversation;
 use ic_cdk::trap;
-use messages::Message;
 use state::STATE;
-use std::collections::HashMap;
 use user::User;
 use utils::CallerTrait;
 
+mod conversation;
 mod messages;
 mod state;
 mod user;
@@ -18,7 +18,7 @@ fn greet() -> String {
 
 // NOTE: Remove in prod
 #[ic_cdk::query]
-fn get_all() -> HashMap<(User, User), Vec<Message>> {
+fn get_all() -> Vec<Conversation> {
     // let caller = anon!();
     // ic_cdk::println!("{:#?}", caller);
     STATE.with_borrow_mut(|state| {
