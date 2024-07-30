@@ -51,7 +51,7 @@ type LastMessage = record {
     content: text;
     timestamp: nat64;
     user: principal;
-}
+};
 
 type Conversation = record {
     id: nat64;
@@ -71,7 +71,7 @@ service : {
     get_messages: (nat64) -> (Conversation) query;
     remove_message: (nat64, nat64) -> ();
     update_message: (nat64, nat64, text) -> ();
-    get_last_message(nat64) -> (opt LastMessage) query;
+    get_last_message: (nat64) -> (opt LastMessage) query;
 
     get_user: () -> (opt User) query;
     add_user: (text, opt text) -> ();
