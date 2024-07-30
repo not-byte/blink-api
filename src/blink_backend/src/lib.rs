@@ -2,14 +2,19 @@ use messages::Message;
 use state::STATE;
 use std::collections::HashMap;
 use user::User;
+use utils::CallerTrait;
 
 mod messages;
 mod state;
 mod user;
+mod utils;
 
 #[ic_cdk::query]
 fn greet() -> String {
     let caller = ic_cdk::caller();
+    if caller.is_anonymous() {
+        panic!("Anonymous");
+    }
     format!("Your PrincipalId is: {}", caller)
 }
 

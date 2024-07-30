@@ -1,77 +1,50 @@
 <script setup lang="ts">
-import { Actor, HttpAgent } from "@dfinity/agent";
+import { Actor, ActorMethod, ActorSubclass, HttpAgent, Identity } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
-import { blink_backend, canisterId, idlFactory, createActor } from "../../declarations/blink_backend/index";
+import { _SERVICE, idlFactory, Message } from "../../declarations/blink_backend/blink_backend.did.js";
+import { blink_backend, canisterId, createActor } from "../../declarations/blink_backend";
+import { Principal } from "@dfinity/principal";
+import { ref } from "vue";
 let authClient: AuthClient | null = null;
+let actor: ActorSubclass<_SERVICE> | null = null;
+let identity = ref<Identity | null>(null);
 
-// async function handleSubmit(e: any) {
-//   e.preventDefault();
-//   const target = e.target;
-//   const name = target.querySelector("#name").value;
-//   await blink_backend.greet(name).then((response: string) => {
-//     greeting.value = response;
-//   });
-// }
+// import { Ref, ref } from "vue";
+// let tmessages: Ref<Message[]> = ref([]);
+// let my_principal = Principal.fromText("2vxsx-fae");
+// console.log(my_principal);
+
+// (async () => {
+//   tmessages.value = await blink_backend.get_messages_with(Principal.fromText("ywdnu-suhio-f24aj-e5qw7-crnlw-6l4xz-nd247-e2mx5-rcqd4-xcnxe-pqe"));
+// })()
 
 async function testFn(e: any) {
-  let a = await blink_backend.greet();
-  console.log(a);
+  let res = await blink_backend.greet();
+  console.log(res);
 }
 
 async function bootstrap() {
-  authClient = await AuthClient.create({
-    idleOptions: {
-      idleTimeout: 1000 * 60 * 30,
-      disableDefaultIdleCallback: true,
-    },
-  });
-}
-
-// let actor = createActor(canisterId, {
-//   agent: await HttpAgent.create({ identity }),
-// })
-
-async function handleSuccess() {
-  const principalId = authClient?.getIdentity().getPrincipal()!;
-
-  document.getElementById("principalId")!.innerText = `Your PrincipalId: ${principalId.toText()} - ${principalId.isAnonymous()}`;
-  const identity = authClient?.getIdentity();
-  const agent = await HttpAgent.create({ identity });
-
-  await agent.fetchRootKey();
-
-  const actor = Actor.createActor(idlFactory, { agent, canisterId });
-
-  Actor.agentOf(actor)!.replaceIdentity!(authClient?.getIdentity()!);
-  let princ = await Actor.agentOf(actor)?.getPrincipal();
-  console.log(princ?.isAnonymous(), princ?.toText());
+  authClient = await AuthClient.create();
 }
 
 async function logIn() {
   if (!authClient) throw new Error("AuthClient not initialized");
 
-  const APP_NAME = "Blink APP";
-  const APP_LOGO = "https://nfid.one/icons/favicon-96x96.png";
-
   await authClient.login({
-    identityProvider: `https://nfid.one/authenticate?applicationName=${APP_NAME}&applicationLogo=${APP_LOGO}`,
-    onSuccess: handleSuccess,
-    windowOpenerFeatures: `
-      left=${window.screen.width / 2 - 525 / 2},
-      top=${window.screen.height / 2 - 705 / 2},
-      toolbar=0,location=0,menubar=0,width=525,height=705
-    `,
+    identityProvider: `http://dccg7-xmaaa-aaaaa-qaamq-cai.localhost:4943/`,
+    // onSuccess: handleSuccess,
   });
+
+  const identity2 = authClient.getIdentity();
+  console.log("Logged in", identity2.getPrincipal());
+  identity.value = identity2
 }
 bootstrap();
 </script>
 
 <template>
   <main>
-    <img src="/logo2.svg" alt="DFINITY logo" />
-    <br />
-    <br />
-
+    {{ identity?.getPrincipal() }}
     <div>
       <button @click="logIn">Log me in</button>
     </div>
@@ -84,6 +57,20 @@ bootstrap();
     <!-- </form> -->
     <!-- <section id="greeting">{{ greeting }}</section> -->
     <button @click="testFn">Click</button>
+    <!-- <button @click="testFn2">Click2</button> -->
   </main>
+
+  <!-- <div style="display: flex; flex-direction: column;"> -->
+  <!--   <template v-for="(message, i) in tmessages" :key="i"> -->
+  <!--     <div :style="[message.caller.toText() == my_principal.toText() ? 'align-self: end' : 'align-self: start']"> -->
+  <!--       <template v-if="message.message.Text !== undefined"> -->
+  <!--         <p>{{ message.message.Text.content }}</p> -->
+  <!--       </template> -->
+  <!--       <template v-else> -->
+  <!--         <img :src="message.message.Image.src" width="100" height="100" :alt="message.message.Image.name"> -->
+  <!--       </template> -->
+  <!--     </div> -->
+  <!--   </template> -->
+  <!-- </div> -->
   <!--  rvkuw-pitzp-xb3bi-rz5n7-7epzj-j3mto-cncll-jstpn-nvd6q-3obt2-cae-->
 </template>
