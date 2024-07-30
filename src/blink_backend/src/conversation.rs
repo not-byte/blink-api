@@ -2,21 +2,26 @@ use candid::{CandidType, Principal};
 use ic_cdk::trap;
 use serde::Deserialize;
 
-use crate::{anon, messages::Message, state::STATE, utils::Conversations, CallerTrait};
+use crate::{
+    anon, messages::Message, state::STATE, update_if_some, user::UserTrait, utils::Conversations,
+    CallerTrait,
+};
 
 // NOTE: Later can add conversation settings here
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct Conversation {
     pub id: u64,
+    pub name: String,
     pub users: Vec<Principal>,
     pub messages: Vec<Message>,
 }
 
 impl Conversation {
-    fn new(id: u64, users: Vec<Principal>) -> Self {
+    fn new(id: u64, users: Vec<Principal>, name: String) -> Self {
         Self {
             id,
             users,
+            name,
             messages: Vec::new(),
         }
     }
@@ -24,11 +29,30 @@ impl Conversation {
 
 #[ic_cdk::update]
 fn create_conversation(users: Vec<Principal>) {
-    anon!();
+    let caller = anon!();
     STATE.with_borrow_mut(|state| {
-        state
-            .conversations
-            .push(Conversation::new(state.conversations.get_last_id(), users));
+        let name = if users.len() == 2 {
+            users
+                .iter()
+                .find(|&&v| v != caller)
+                .unwrap()
+                .to_user_state(state.to_owned())
+                .unwrap()
+                .username
+        } else {
+            users
+                .iter()
+                .take(3)
+                .map(|v| v.to_user_state(state.to_owned()).unwrap().username)
+                .collect::<Vec<String>>()
+                .join(", ")
+        };
+
+        state.conversations.push(Conversation::new(
+            state.conversations.get_last_id(),
+            users,
+            name,
+        ));
     })
 }
 
@@ -52,6 +76,22 @@ fn remove_conversation(conversation_id: u64) {
         } else {
             trap(r#"{"message": "You can't remove this conversation"}"#)
         }
+    })
+}
+
+#[ic_cdk::update]
+fn update_conversation(conversation_id: u64, name: Option<String>) {
+    let caller = anon!();
+    STATE.with_borrow_mut(|state| {
+        let Some(conversation) = state.conversations.find(conversation_id) else {
+            trap(r#"{"message": "Conversation not found"}"#);
+        };
+
+        let Some(_) = conversation.users.iter().position(|v| *v == caller) else {
+            trap(r#"{"message": "User not in conversation"}"#);
+        };
+
+        update_if_some!(conversation.name, name);
     })
 }
 
