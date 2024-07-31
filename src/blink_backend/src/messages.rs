@@ -37,6 +37,7 @@ pub struct Message {
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct LastMessage {
+    pub conversation_id: u64,
     pub content: String,
     pub timestamp: u64,
     pub user: User,
@@ -122,6 +123,7 @@ fn get_last_message(conversation_id: u64) -> Option<LastMessage> {
                 .messages
                 .last()
                 .map(|v| LastMessage {
+                    conversation_id,
                     content: match &v.message {
                         MessageContent::Text(text) => text.content.clone(),
                         MessageContent::Image(image) => image.name.clone(),

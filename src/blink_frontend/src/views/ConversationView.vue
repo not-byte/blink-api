@@ -2,20 +2,25 @@
 import { Conversation } from "declarations/blink_backend/blink_backend.did.js";
 import { ref } from "vue";
 import { useRoute } from 'vue-router'
-import { AuthClient } from "@dfinity/auth-client";
-import { Principal } from "@dfinity/principal";
+import { useStorageStore } from "@/stores/storage";
 import { useAuthStore } from "@/stores/auth";
-let tmessages = ref<Conversation | undefined>();
+import { storeToRefs } from "pinia";
+
+const tmessages = ref<Conversation | undefined>();
 
 const route = useRoute();
 let id = BigInt(route.params.reciever_id as string);
 
 const auth = useAuthStore();
+const my_principal = auth.identity.getPrincipal().toText();
 
-(async () => {
-  console.log(auth.getPrincipal());
-  tmessages.value = await auth.actor.get_messages(id);
-})()
+const storage = useStorageStore();
+const { getConversation } = storeToRefs(storage);
+
+setTimeout(() => {
+  tmessages.value = getConversation.value(id);
+  console.log("messages: ", tmessages.value);
+}, 1000)
 </script>
 
 <template>
@@ -24,8 +29,8 @@ const auth = useAuthStore();
     <p>{{ $route.params.reciever_id }}</p>
 
     <div style="display: flex; flex-direction: column;">
-      <template v-for="(message, i) in tmessages" :key="i">
-        <div :style="[message.caller.toText() == my_principal.toText() ? 'align-self: end' : 'align-self: start']">
+      <template v-for="(message, i) in tmessages.messages" :key="i">
+        <div :style="[message.caller.toText() == my_principal ? 'align-self: end' : 'align-self: start']">
           <template v-if="message.message.Text !== undefined">
             <p>{{ message.message.Text.content }}</p>
           </template>

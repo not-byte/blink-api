@@ -6,7 +6,6 @@ import { RouterView } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useStorageStore } from "@/stores/storage";
 import { Principal } from "@dfinity/principal";
-import { computed } from "vue";
 
 const auth = useAuthStore();
 

@@ -11,6 +11,7 @@ export const useStorageStore = defineStore("storage", {
   getters: {
     getLastMessages: (state) => {
       return state.last_messages.map(v => ({
+        conversation_id: Number(v.conversation_id),
         user: {
           username: v.user.username,
           avatar: convert(v.user.avatar)
@@ -18,7 +19,23 @@ export const useStorageStore = defineStore("storage", {
         content: v.content as string,
         timestamp: Number(v.timestamp),
       }));
-    }
+    },
+    
+    getConversation: (state) => {
+      return (id: number) => {
+        const new_conversation = state.conversations.find(v => v.id == BigInt(id))
+        return {
+          id: Number(new_conversation?.id),
+          messages: new_conversation?.messages.map(v => ({
+            id: Number(v.id),
+            caller: v.caller,
+            message: v.message,
+            timestamp: Number(v.timestamp)
+          })),
+          users: new_conversation?.users,
+        }
+      };
+    },
   },
   actions: {
     setUser(user: User) {
