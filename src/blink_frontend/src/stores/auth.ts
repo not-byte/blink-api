@@ -1,20 +1,9 @@
-import { ref } from "vue";
 import { defineStore } from "pinia";
 import type { ActorSubclass, Identity } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
-import type { _SERVICE, Conversation, LastMessage, User } from "../../../declarations/blink_backend/blink_backend.did.js";
+import type { _SERVICE, User } from "../../../declarations/blink_backend/blink_backend.did.js";
 import { canisterId, createActor } from "../../../declarations/blink_backend";
-import type { Principal } from "@dfinity/principal";
-
-function convert<T>(input: [] | [T] | undefined): T | undefined {
-  if (input === undefined) {
-    return undefined;
-  } else if (input.length === 0) {
-    return undefined;
-  } else {
-    return input[0];
-  }
-}
+import { convert } from "@/utils/util";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -23,13 +12,9 @@ export const useAuthStore = defineStore("auth", {
     actor: null as ActorSubclass<_SERVICE> | null,
   }),
   getters: {
-    getConversations: async (state) => {
-      console.log(state.actor);
-      console.log(state.actor?.get_user_conversations());
-      return await state.actor?.get_user_conversations();
-    },
+    getConversations: async (state) => await state.actor?.get_user_conversations(),
 
-    getLastMessage: async (state) => {
+    getLastMessage: (state) => {
       return async (id: number) => convert(await state.actor?.get_last_message(BigInt(id)));
     },
 
@@ -37,9 +22,9 @@ export const useAuthStore = defineStore("auth", {
       return state.identity?.getPrincipal();
     },
 
-    getUser: async (state) => {
-      return convert(await state.actor?.get_user());
-    },
+    async getUser(): Promise<User | undefined> {
+      return convert(await this.actor?.get_user());
+    }
   },
   actions: {
     async setAuthClient() {

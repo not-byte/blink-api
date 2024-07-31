@@ -1,10 +1,12 @@
 <script lang="ts" setup>
+import { storeToRefs } from "pinia";
 import NavigationBar from "@/components/navigation/NavigationBar.vue";
 import type { Conversation, LastMessage, User } from "../../declarations/blink_backend/blink_backend.did";
 import { RouterView } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useStorageStore } from "@/stores/storage";
 import { Principal } from "@dfinity/principal";
+import { computed } from "vue";
 
 const auth = useAuthStore();
 
@@ -18,6 +20,7 @@ function verifyLogin() {
 async function logIn() {
   if (!auth.authClient) throw new Error("AuthClient not initialized");
   const storage = useStorageStore();
+  const { getLastMessage } = storeToRefs(auth);
 
   await auth.logIn();
 
@@ -26,13 +29,13 @@ async function logIn() {
     // Set conversations
     const conversations: Conversation[] = await auth.getConversations;
     storage.setConversations(conversations);
-    console.log("test:", storage.getConversations);
+    console.log("test:", storage.conversations);
 
     // Set last messages
     const ids = conversations.map(v => v.id);
     let conversations_parsed: LastMessage[] = [];
     ids.forEach(async id => {
-      conversations_parsed.push(await auth.getLastMessage(id));
+      conversations_parsed.push(await getLastMessage.value(id));
     });
     storage.setLastMessages(conversations_parsed);
 

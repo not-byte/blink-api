@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import type { Conversation, LastMessage, User } from "../../../declarations/blink_backend/blink_backend.did";
+import { convert } from "@/utils/util";
 
 export const useStorageStore = defineStore("storage", {
   state: () => ({
@@ -8,20 +9,28 @@ export const useStorageStore = defineStore("storage", {
     user: null as User | null,
   }),
   getters: {
-    getConversations: (state) => { return state.conversations }
+    getLastMessages: (state) => {
+      return state.last_messages.map(v => ({
+        user: {
+          username: v.user.username,
+          avatar: convert(v.user.avatar)
+        },
+        content: v.content as string,
+        timestamp: Number(v.timestamp),
+      }));
+    }
   },
   actions: {
-    setUser(_user: User) {
-      this.user = _user;
+    setUser(user: User) {
+      this.user = user;
     },
 
-    setLastMessages(_last_messages: LastMessage[]) {
-      this.last_messages = _last_messages;
+    setLastMessages(last_messages: LastMessage[]) {
+      this.last_messages = last_messages;
     },
 
-    setConversations(_conversations: Conversation[]) {
-      this.conversations = _conversations;
+    setConversations(conversations: Conversation[]) {
+      this.conversations = conversations;
     }
   }
-
 });

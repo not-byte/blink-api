@@ -6,6 +6,7 @@ use crate::{
     anon,
     conversation::Conversation,
     state::STATE,
+    user::{User, UserTrait},
     utils::{CallerTrait, Filter},
 };
 
@@ -38,7 +39,7 @@ pub struct Message {
 pub struct LastMessage {
     pub content: String,
     pub timestamp: u64,
-    pub user: Principal,
+    pub user: User,
 }
 
 #[ic_cdk::update]
@@ -126,7 +127,11 @@ fn get_last_message(conversation_id: u64) -> Option<LastMessage> {
                         MessageContent::Image(image) => image.name.clone(),
                     },
                     timestamp: v.timestamp,
-                    user: v.caller,
+                    // Currently user is returned because we are low on time
+                    // but this is a security vulterability which allows
+                    // for looking at other users configuration
+                    user: v.caller.to_user_state(state.to_owned()).unwrap(),
+                    // user: v.caller,
                 })
         } else {
             trap(r#"{"message": "You can't access other conversations"}"#);

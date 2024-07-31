@@ -19,7 +19,7 @@ type Status = variant {
 type User = record {
     "principal": principal;
     username: text;
-    avatar: text;
+    avatar: opt text;
     language: Language;
     theme: Theme;
     status: Status;
@@ -49,7 +49,7 @@ type Message = record {
 type LastMessage = record {
     content: text;
     timestamp: nat64;
-    user: principal;
+    user: User;
 };
 
 type Conversation = record {
