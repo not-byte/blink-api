@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import NavigationBar from "@/components/navigation/NavigationBar.vue";
+import type { Conversation, LastMessage, User } from "../../declarations/blink_backend/blink_backend.did";
 import { RouterView } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { useStorageStore } from "@/stores/storage";
 import { Principal } from "@dfinity/principal";
-import { onBeforeMount } from "vue";
 
 const auth = useAuthStore();
 
@@ -16,20 +17,34 @@ function verifyLogin() {
 
 async function logIn() {
   if (!auth.authClient) throw new Error("AuthClient not initialized");
+  const storage = useStorageStore();
 
   await auth.logIn();
 
   // TODO: Get username properly
   try {
-    console.log(auth.getPrincipal().toText());
-    let conversations = await auth.getConversations();
-    console.log(conversations);
+    // Set conversations
+    const conversations: Conversation[] = await auth.getConversations;
+    storage.setConversations(conversations);
+    console.log("test:", storage.getConversations);
+
+    // Set last messages
+    const ids = conversations.map(v => v.id);
+    let conversations_parsed: LastMessage[] = [];
+    ids.forEach(async id => {
+      conversations_parsed.push(await auth.getLastMessage(id));
+    });
+    storage.setLastMessages(conversations_parsed);
+
+    // Set user
+    const user: User = await auth.getUser;
+    storage.setUser(user);
   } catch (e) {
     console.error(e);
   }
 }
 
-onBeforeMount(async () => {
+(async () => {
   await auth.setAuthClient();
   try {
     verifyLogin();
@@ -37,7 +52,7 @@ onBeforeMount(async () => {
     console.error(e);
     await logIn();
   }
-})
+})()
 </script>
 
 <template>

@@ -2,7 +2,7 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 import type { ActorSubclass, Identity } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
-import type { _SERVICE, Conversation, LastMessage } from "../../../declarations/blink_backend/blink_backend.did.js";
+import type { _SERVICE, Conversation, LastMessage, User } from "../../../declarations/blink_backend/blink_backend.did.js";
 import { canisterId, createActor } from "../../../declarations/blink_backend";
 import type { Principal } from "@dfinity/principal";
 
@@ -16,74 +16,75 @@ function convert<T>(input: [] | [T] | undefined): T | undefined {
   }
 }
 
-export const useAuthStore = defineStore("auth", () => {
-  const identity = ref<Identity>();
-  const authClient = ref<AuthClient>();
-  const actor = ref<ActorSubclass<_SERVICE>>();
+export const useAuthStore = defineStore("auth", {
+  state: () => ({
+    identity: null as Identity | null,
+    authClient: null as AuthClient | null,
+    actor: null as ActorSubclass<_SERVICE> | null,
+  }),
+  getters: {
+    getConversations: async (state) => {
+      console.log(state.actor);
+      console.log(state.actor?.get_user_conversations());
+      return await state.actor?.get_user_conversations();
+    },
 
-  async function setAuthClient() {
-    console.log("set auth client");
-    authClient.value = await AuthClient.create();
-    console.log("set auth client end");
+    getLastMessage: async (state) => {
+      return async (id: number) => convert(await state.actor?.get_last_message(BigInt(id)));
+    },
+
+    getPrincipal: (state) => {
+      return state.identity?.getPrincipal();
+    },
+
+    getUser: async (state) => {
+      return convert(await state.actor?.get_user());
+    },
+  },
+  actions: {
+    async setAuthClient() {
+      console.log("set auth client");
+      this.authClient = await AuthClient.create();
+      console.log("set auth client end");
+    },
+
+    setIdentity() {
+      console.log("set identity");
+      this.identity = this.authClient?.getIdentity() as Identity
+      console.log("set identity end");
+    },
+
+    async logIn() {
+      // FIX: A stupid workaround
+      const localAuthClient = await AuthClient.create();
+      await localAuthClient.login({
+        identityProvider: `http://dccg7-xmaaa-aaaaa-qaamq-cai.localhost:4943/`,
+        onSuccess: () => {
+          console.log('Login Successful!');
+        },
+        onError: (error) => {
+          console.error('Login Failed: ', error);
+        }
+      });
+      console.log(localAuthClient.getIdentity().getPrincipal().toText());
+      this.identity = localAuthClient.getIdentity();
+      this.authClient = localAuthClient;
+      this.actor = createActor(canisterId, {
+        agentOptions: {
+          identity: this.identity as Identity
+        }
+      })
+      console.log("login end");
+    },
+
+    // async addUser(name: string, avatar?: string) {
+    //   console.log("user start");
+    //   const new_avatar: [string] | [] = avatar !== undefined ? [avatar] : [];
+    //   const actor = getActor();
+    //   await actor.add_user(name, new_avatar)
+    //   console.log("user end");
+    // },
   }
-
-  function setIdentity() {
-    console.log("set identity");
-    identity.value = authClient.value?.getIdentity()
-    console.log("set identity end");
-  }
-
-  function setActor() {
-    console.log("set actor");
-    actor.value = createActor(canisterId, {
-      agentOptions: {
-        identity: identity.value
-      }
-    });
-    console.log("set actor end");
-  }
-
-  async function logIn() {
-    // FIX: A stupid workaround
-    const localAuthClient = await AuthClient.create();
-    await localAuthClient.login({
-      identityProvider: `http://dccg7-xmaaa-aaaaa-qaamq-cai.localhost:4943/`,
-      onSuccess: () => {
-        console.log('Login Successful!');
-      },
-      onError: (error) => {
-        console.error('Login Failed: ', error);
-      }
-    });
-    console.log(localAuthClient.getIdentity().getPrincipal().toText());
-    identity.value = localAuthClient.getIdentity();
-    actor.value = createActor(canisterId, {
-      agentOptions: {
-        identity: identity.value
-      }
-    });
-    authClient.value = localAuthClient;
-    console.log("login end");
-  }
-
-  async function addUser(name: string, avatar?: string) {
-    console.log("user start");
-    const new_avatar: [string] | [] = avatar !== undefined ? [avatar] : [];
-    await actor.value?.add_user(name, new_avatar)
-    console.log("user end");
-  }
-
-  async function getConversations(): Promise<Conversation[] | undefined> {
-    return await actor.value?.get_user_conversations();
-  }
-
-  async function getLastMessage(id: number): Promise<LastMessage | undefined> {
-    return convert(await actor.value?.get_last_message(BigInt(id)));
-  }
-
-  function getPrincipal(): Principal | undefined {
-    return identity.value?.getPrincipal();
-  }
-
-  return { identity, authClient, actor, setAuthClient, setIdentity, setActor, logIn, addUser, getPrincipal, getConversations, getLastMessage };
 });
+
+
