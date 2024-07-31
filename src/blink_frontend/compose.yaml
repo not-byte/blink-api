@@ -1,0 +1,12 @@
+services:
+    blink:
+        container_name: "blink"
+        image: "blink:latest"
+        restart: always
+        ports:
+            - "3000:80"
+        build: .
+
+networks:
+    default:
+        name: blink-network
