@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
-import type { Conversation, LastMessage, User } from "../../declarations/blink_backend/blink_backend.did";
+import type { Conversation, LastMessage, User } from "@declarations/blink_backend.did";
 import { RouterView } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useStorageStore } from "@/stores/storage";
@@ -10,7 +10,7 @@ const auth = useAuthStore();
 
 function verifyLogin() {
   console.log("verifylogin");
-  if (auth.identity?.value === undefined || auth.identity?.value?.getPrincipal() == Principal.anonymous()) {
+  if (auth.identity === undefined || auth.identity.getPrincipal() == Principal.anonymous()) {
     throw new Error("Not logged in")
   }
 }
@@ -24,9 +24,11 @@ async function logIn() {
 
   try {
     // TODO: Get username properly
-    await auth.addUser("Me", null);
-  } catch {
-    console.info("User already exists");
+    await auth.addUser("Me");
+  } catch (e) {
+    console.groupCollapsed("User already exists");
+    console.error(e);
+    console.groupEnd();
   }
 
   try {
@@ -38,9 +40,9 @@ async function logIn() {
     // Set last messages
     const ids = conversations.map(v => v.id);
     let conversations_parsed: LastMessage[] = [];
-    ids.forEach(async id => {
-      conversations_parsed.push(await getLastMessage.value(id));
-    });
+    conversations_parsed = await Promise.all(ids.map(async id => {
+      return await getLastMessage.value(id);
+    }));
     storage.setLastMessages(conversations_parsed);
 
     // Set user
@@ -55,8 +57,8 @@ async function logIn() {
   await auth.setAuthClient();
   try {
     verifyLogin();
-  } catch (e) {
-    console.error(e);
+  } catch {
+    console.error("Not logged in");
     await logIn();
   }
 })()
