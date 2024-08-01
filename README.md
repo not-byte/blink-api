@@ -1,61 +1,173 @@
-# `blink`
+![BLINK](./.github/readme/heading.svg)
 
-Welcome to your new `blink` project and to the Internet Computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.
+# BLINK
 
-To get started, you might want to explore the project directory structure and the default configuration file. Working with this project in your development environment will not affect any production deployment or identity tokens.
+The Blink project 👀 is a Decentralized Communicator, that aims to leverage [WEB3 technology](#web3) and provide easy
+access and
+communication with people around the world 🗺️ Written in [Rust
+🦀](https://github.com/rust-lang/rust), [Vue.js+TS](https://github.com/vuejs/core), [Pinia](https://github.com/vuejs/pinia)
+🍍
+and [TailwindCSS](https://github.com/tailwindlabs/tailwindcss) 🍃 with the [Dfinity
+CDK](https://github.com/dfinity/cdk-rs) for compiling.
 
-To learn more before you start working with `blink`, see the following documentation available online:
+### About
 
-- [Quick Start](https://internetcomputer.org/docs/current/developer-docs/setup/deploy-locally)
-- [SDK Developer Tools](https://internetcomputer.org/docs/current/developer-docs/setup/install)
-- [Rust Canister Development Guide](https://internetcomputer.org/docs/current/developer-docs/backend/rust/)
-- [ic-cdk](https://docs.rs/ic-cdk)
-- [ic-cdk-macros](https://docs.rs/ic-cdk-macros)
-- [Candid Introduction](https://internetcomputer.org/docs/current/developer-docs/backend/candid/)
+The goal is to create innovative solutions in digital services, data security, scalability, and
+interoperability.
 
-If you want to start working on your project right away, you might want to try the following commands:
+<p id="web3"></p>
+Web3 is an idea for a new iteration of the World Wide Web which incorporates concepts
+such as decentralization, blockchain technologies, and token-based economics.
 
-```bash
-cd blink/
-dfx help
-dfx canister --help
+Our challenge is to develop a canister on the Internet Computer that addresses one or more problems
+described in the
+contest project. We have chosen to create a DApp with a communication system.
+
+### Requirements (Met!)
+
+- [x] A public project on GitHub with complete code
+- [x] A detailed project description in the README file
+- [x] A short presentation of the idea (maximum 3 minutes)
+
+> _Build a Layer 2 application for Bitcoin and/or Ethereum using ICP functionalities to provide solutions beneficial to
+the
+Bitcoin and Ethereum ecosystems in Europe. This could include innovative financial services, cross-border transactions,
+secure storage solutions, or applications that interact with other blockchains using Chain-key signatures and retrieve
+data from RPC nodes. The only limitation is your hardware._
+
+### Version
+
+First release 1.0.0-BETA
+
+> [!Caution]
+> Project is still under a development
+
+If you encounter any bugs or errors, create an issue and head to the [Security section](#security)
+
+<p id="navigation"></p>
+
+![Navigation](./.github/readme/navigation.svg)
+
+| Section      | Topic                                                        |
+|--------------|--------------------------------------------------------------|
+| Summary      | [Short summary of the project](#blink)                       |
+| Technologies | [What we've used](#technologies)                             |
+| Setup        | [How to host one yourself](#setup)                           |
+| Interface    | [Navigation inside the App](#interface)                      |
+| Service      | [What's happening under the hood?](#service)                 |
+| Authors      | [See who created this masterpiece](#authors)                 |
+| Contributing | [Join us and create a better user experience](#contributing) |
+| License      | [Want to use our codebase for work?](#license)               |
+| Security     | [Learn more about our code vulnerabilities](#security)       |
+
+<p id="technologies"></p>
+
+![Technologies](./.github/readme/technologies.svg)
+![Icons](./.github/readme/icons.svg)
+
+For our backend service we have chosen **Rust** 🦀 as Message provider with it’s memory safety and blazingly fast 🚀
+computing.
+
+In creating interface **TypeScript** and **Vue.js** helped us the most, with addition of TailwindCSS for styling and
+Vite,
+Docker for deployment, so we can launch our project to at any time!
+
+<p id="setup"></p>
+
+![Project setup](./.github/readme/setup.svg)
+
+### Deployment
+
+```sh
+dfx start
 ```
 
-## Running the project locally
-
-If you want to test your project locally, you can use the following commands:
-
-```bash
-# Starts the replica, running in the background
-dfx start --background
-
-# Deploys your canisters to the replica and generates your candid interface
+```sh
 dfx deploy
 ```
 
-Once the job completes, your application will be available at `http://localhost:4943?canisterId={asset_canister_id}`.
+<p id="interface"></p>
 
-If you have made changes to your backend canister, you can generate a new candid interface with
+![Interface](./.github/readme/interface.svg)
 
-```bash
-npm run generate
-```
+### [Messages](./src/views/MessagesView.vue)
 
-at any time. This is recommended before starting the frontend development server, and will be run automatically any time you run `dfx deploy`.
+This section provides features to search for users, view currently online users, and browse through recent open
+chats.
 
-If you are making frontend changes, you can start a development server with
+### [Chat](./src/views/ChatView.vue)
 
-```bash
-npm start
-```
+Here, the entire application process takes place, including the exchange of messages and images.
 
-Which will start a server at `http://localhost:8080`, proxying API requests to the replica at port 4943.
+### [Discover](./src/views/DiscoverView.vue)
 
-### Note on frontend environment variables
+This section allows users to find new people that want to communicate.
 
-If you are hosting frontend code somewhere without using DFX, you may need to make one of the following adjustments to ensure your project does not fetch the root key in production:
+> [!WARNING]
+> Work-in-progress Feature
 
-- set`DFX_NETWORK` to `ic` if you are using Webpack
-- use your own preferred method to replace `process.env.DFX_NETWORK` in the autogenerated declarations
-  - Setting `canisters -> {asset_canister_id} -> declarations -> env_override to a string` in `dfx.json` will replace `process.env.DFX_NETWORK` with the string in the autogenerated declarations
-- Write your own `createActor` constructor
+### [Settings](./src/views/SettingsView.vue)
+
+This option enables users to personalize the application's appearance and behavior to suit their daily usage
+preferences and needs.
+
+> [!WARNING]
+> Work-in-progress Feature
+
+<p id="service"></p>
+
+![Service](./.github/readme/service.svg)
+
+### Storage
+
+Because blockchain is immutable by default we need to ensure data integrity during contract upgrades by using stable
+storage. This also allows to reliably save data on the blockchain. Ensures that the contract can always be brought back
+to a known good state.
+
+<p id="authors"></p>
+
+![Authors](./.github/readme/authors.svg)
+
+<p align="center">
+    <a href="https://github.com/botprzemek">
+        <img src="./.github/readme/botprzemek.svg" alt="botprzemek" width="31%" align="left"/>
+    </a>
+    <a href="https://github.com/Braspi">
+        <img src="./.github/readme/braspi.svg" alt="Braspi" width="31%" align="center"/>
+    </a>
+    <a href="https://github.com/ponurakk">    
+        <img src="./.github/readme/ponurakk.svg" alt="ponurakk" width="31%" align="right"/>
+    </a>
+</p>
+
+<p id="contributing"></p>
+
+![Contributing](./.github/readme/contributing.svg)
+
+> I would like to join this list. How can I help the project?
+
+We're currently looking for contributions for the following:
+
+1. Bug fixes and penetration
+2. Refactors
+3. Configs improvements
+4. Ideas (even if we already have a ton to implement)
+
+<p id="license"></p>
+
+![License](./.github/readme/license.svg)
+
+This project is licensed under the Apache License, Version 2.0. Key points are: permissions and conditions of usage. For
+more detailed information, please refer to the [LICENSE file](./LICENSE)
+
+<p id="security"></p>
+
+![Security](./.github/readme/security.svg)
+
+To learn more about project versions see [SECURITY.md](./SECURITY.md)
+
+
+<p align="center">
+    Thanks for reaching the bottom!
+    <a href="#navigation">Go back to the top</a>
+</p>
