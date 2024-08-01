@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { getTime } from "@/utils/util";
 const props = defineProps<{
   sender: string;
   message: string;
@@ -18,11 +19,11 @@ const props = defineProps<{
       </p>
     </template>
     <template v-else>
-      <p class="w-full flex justify-between gap-3 text-sm text-lavender">
+      <p class="w-full flex justify-start gap-3 text-sm text-lavender">
         <span>{{ props.sender }}</span>
         <span>{{ getTime(props.timestamp) }}</span>
       </p>
-      <p class="px-5 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
+      <p class="px-5 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl self-start">
         {{ message }}
       </p>
     </template>

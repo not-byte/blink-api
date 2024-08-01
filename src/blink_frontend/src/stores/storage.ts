@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { Conversation, LastMessage, User } from "../../../declarations/blink_backend/blink_backend.did";
+import type { Conversation, LastMessage, User, Message } from "../../../declarations/blink_backend/blink_backend.did";
 import { convert } from "@/utils/util";
 
 export const useStorageStore = defineStore("storage", {
@@ -10,11 +10,13 @@ export const useStorageStore = defineStore("storage", {
   }),
   getters: {
     getLastMessages: (state) => {
-      return state.last_messages.map(v => ({
+      console.warn(state.last_messages);
+      return state.last_messages.map((v: LastMessage) => ({
         conversation_id: Number(v.conversation_id),
         user: {
+          principal: v.user.principal,
           username: v.user.username,
-          avatar: convert(v.user.avatar)
+          avatar: convert(v.user.avatar),
         },
         content: v.content as string,
         timestamp: Number(v.timestamp),
@@ -23,14 +25,16 @@ export const useStorageStore = defineStore("storage", {
     
     getConversation: (state) => {
       return (id: number) => {
-        const new_conversation = state.conversations.find(v => v.id == BigInt(id))
+        const new_conversation = state.conversations.find((conversation: Conversation) => conversation.id == BigInt(id))
+        console.log(new_conversation);
         return {
           id: Number(new_conversation?.id),
-          messages: new_conversation?.messages.map(v => ({
-            id: Number(v.id),
-            caller: v.caller,
-            message: v.message,
-            timestamp: Number(v.timestamp)
+          name: new_conversation?.name,
+          messages: new_conversation?.messages.map((message: Message) => ({
+            id: Number(message.id),
+            caller: message.caller,
+            message: message.message,
+            timestamp: Number(message.timestamp)
           })),
           users: new_conversation?.users,
         }

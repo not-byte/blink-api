@@ -4,6 +4,7 @@ import { AuthClient } from "@dfinity/auth-client";
 import type { _SERVICE, User } from "../../../declarations/blink_backend/blink_backend.did.js";
 import { canisterId, createActor } from "../../../declarations/blink_backend";
 import { convert } from "@/utils/util";
+import { useStorageStore } from "./storage.js";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -45,13 +46,13 @@ export const useAuthStore = defineStore("auth", {
       await localAuthClient.login({
         identityProvider: `http://dccg7-xmaaa-aaaaa-qaamq-cai.localhost:4943/`,
         onSuccess: () => {
-          console.log('Login Successful!');
+          console.info('Login Successful!');
         },
         onError: (error) => {
           console.error('Login Failed: ', error);
         }
       });
-      console.log(localAuthClient.getIdentity().getPrincipal().toText());
+      // console.log(localAuthClient.getIdentity().getPrincipal().toText());
       this.identity = localAuthClient.getIdentity();
       this.authClient = localAuthClient;
       this.actor = createActor(canisterId, {
@@ -59,7 +60,6 @@ export const useAuthStore = defineStore("auth", {
           identity: this.identity as Identity
         }
       })
-      console.log("login end");
     },
 
     async addUser(name: string, avatar?: string) {
@@ -68,5 +68,3 @@ export const useAuthStore = defineStore("auth", {
     },
   }
 });
-
-

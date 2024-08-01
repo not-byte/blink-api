@@ -1,17 +1,20 @@
 <script lang="ts" setup>
 import { useStorageStore } from "@/stores/storage";
 import { useAuthStore } from "@/stores/auth";
-import { ref } from "vue";
+import { Ref, ref } from "vue";
 import { getTime, trimStr } from "@/utils/util"
-import type { LastMessage } from "../../../../../declarations/blink_backend/blink_backend.did";
+import type { LastMessage } from "@declarations/blink_backend.did";
+import { storeToRefs } from "pinia";
 
-const last_messages = ref<LastMessage[]>([])
+const last_messages: Ref<LastMessage[]> = ref([]);
 
 const storage = useStorageStore();
 const auth = useAuthStore();
-setTimeout(() => {
-  last_messages.value = storage.getLastMessages;
-}, 2000)
+storage.$subscribe((_, state) => {
+  const { getLastMessages } = storeToRefs(storage);
+  last_messages.value = getLastMessages.value;
+  console.log("Last messages", last_messages.value);
+});
 </script>
 
 <template>
