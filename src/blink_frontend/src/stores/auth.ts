@@ -62,13 +62,10 @@ export const useAuthStore = defineStore("auth", {
       console.log("login end");
     },
 
-    // async addUser(name: string, avatar?: string) {
-    //   console.log("user start");
-    //   const new_avatar: [string] | [] = avatar !== undefined ? [avatar] : [];
-    //   const actor = getActor();
-    //   await actor.add_user(name, new_avatar)
-    //   console.log("user end");
-    // },
+    async addUser(name: string, avatar?: string) {
+      const new_avatar: [string] | [] = avatar !== undefined ? [avatar] : [];
+      await this.actor?.add_user(name, new_avatar)
+    },
   }
 });
 

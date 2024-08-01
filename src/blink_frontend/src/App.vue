@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
-import NavigationBar from "@/components/navigation/NavigationBar.vue";
 import type { Conversation, LastMessage, User } from "../../declarations/blink_backend/blink_backend.did";
 import { RouterView } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
@@ -23,7 +22,13 @@ async function logIn() {
 
   await auth.logIn();
 
-  // TODO: Get username properly
+  try {
+    // TODO: Get username properly
+    await auth.addUser("Me", null);
+  } catch {
+    console.info("User already exists");
+  }
+
   try {
     // Set conversations
     const conversations: Conversation[] = await auth.getConversations;
@@ -59,8 +64,27 @@ async function logIn() {
 
 <template>
   <main
-    class="relative aspect-[5/10] w-[28rem] 3xl:aspect-[4/9] flex flex-col items-center gap-6 p-9 rounded-3xl overflow-hidden bg-background bg-center bg-cover border border-white/10">
-    <RouterView />
-    <NavigationBar />
+    class="relative w-[28rem] h-[63rem] aspect-[4/9] p-9 rounded-3xl overflow-clip bg-base bg-center bg-cover border border-white/10">
+    <router-view v-slot="{ Component }">
+      <transition mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
   </main>
 </template>
+
+<style>
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 700ms ease-in-out;
+}
+
+.v-enter-active {
+  transition-delay: 350ms;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+</style>

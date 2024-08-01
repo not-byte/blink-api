@@ -1,6 +1,6 @@
 {
   "name": "blink_frontend",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -52,26 +52,23 @@
   "homepage": "https://github.com/not-byte/blink-app#readme",
   "keywords": [
     "blink",
-    "app",
-    "vuejs"
+    "blockchain",
+    "cdk",
+    "communicator",
+    "decentralized",
+    "dfinity",
+    "rust",
+    "tailwindcss",
+    "typescript",
+    "web3"
   ],
   "license": "Apache-2.0",
   "main": "./src",
-  "name": "vue-chat",
   "prettier": {
     "tabWidth": 4
   },
-  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/not-byte/blink-app.git"
-  },
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "test:unit": "vitest"
-  },
-  "type": "module",
-  "version": "1.0.0"
+  }
 }
