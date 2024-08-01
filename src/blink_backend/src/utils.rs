@@ -1,6 +1,6 @@
 use candid::Principal;
 
-use crate::{conversation::Conversation, messages::Message};
+use crate::{conversation::Conversation, messages::Message, user::User};
 
 pub trait CallerTrait {
     /// Shortcut for comparing Principals
@@ -18,7 +18,7 @@ pub trait Filter<T> {
     fn find(&mut self, id: u64) -> Option<&mut T>;
 
     /// Find all T where caller exists
-    fn filter(&self, caller: Principal) -> Vec<T>;
+    fn filter(&self, caller: User) -> Vec<T>;
 
     /// Get last id from Vec<T>
     fn get_last_id(&self) -> u64;
@@ -31,7 +31,7 @@ impl Filter<Conversation> for Vec<Conversation> {
     }
 
     /// Find all Conversations where caller exists
-    fn filter(&self, caller: Principal) -> Vec<Conversation> {
+    fn filter(&self, caller: User) -> Vec<Conversation> {
         self.iter()
             .filter(|v| v.users.contains(&caller))
             .cloned()
@@ -51,7 +51,7 @@ impl Filter<Message> for Vec<Message> {
     }
 
     #[allow(unused)]
-    fn filter(&self, caller: Principal) -> Vec<Message> {
+    fn filter(&self, caller: User) -> Vec<Message> {
         unimplemented!()
     }
 

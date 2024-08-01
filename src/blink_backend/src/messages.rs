@@ -49,11 +49,15 @@ fn send_message(conversation_id: u64, content: String) {
     let timestamp = ic_cdk::api::time() / 1_000_000;
 
     STATE.with_borrow_mut(|state| {
+        let Some(user) = caller.to_user_state(state.to_owned()) else {
+            trap(r#"{"message": "User does not exists"}"#);
+        };
+
         let Some(conversation) = state.conversations.find(conversation_id) else {
             trap(r#"{"message": "Conversation not found"}"#);
         };
 
-        if !conversation.users.contains(&caller) {
+        if !conversation.users.contains(&user) {
             trap(r#"{"message": "User not in conversation"}"#);
         }
 
@@ -74,11 +78,15 @@ fn send_image(conversation_id: u64, image: String, name: String) {
     let timestamp = ic_cdk::api::time() / 1_000_000;
 
     STATE.with_borrow_mut(|state| {
+        let Some(user) = caller.to_user_state(state.to_owned()) else {
+            trap(r#"{"message": "User does not exists"}"#);
+        };
+
         let Some(conversation) = state.conversations.find(conversation_id) else {
             trap(r#"{"message": "Conversation not found"}"#);
         };
 
-        if !conversation.users.contains(&caller) {
+        if !conversation.users.contains(&user) {
             trap(r#"{"message": "User not in conversation"}"#);
         }
 
@@ -97,11 +105,15 @@ fn send_image(conversation_id: u64, image: String, name: String) {
 fn get_messages(conversation_id: u64) -> Conversation {
     let caller = anon!();
     STATE.with_borrow_mut(|state| {
+        let Some(user) = caller.to_user_state(state.to_owned()) else {
+            trap(r#"{"message": "User does not exists"}"#);
+        };
+
         let Some(conversation) = state.conversations.find(conversation_id) else {
             trap(r#"{"message": "Conversation not found"}"#);
         };
 
-        if conversation.users.contains(&caller) {
+        if conversation.users.contains(&user) {
             conversation.to_owned()
         } else {
             trap(r#"{"message": "You can't access other conversations"}"#);
@@ -113,11 +125,15 @@ fn get_messages(conversation_id: u64) -> Conversation {
 fn get_last_message(conversation_id: u64) -> Option<LastMessage> {
     let caller = anon!();
     STATE.with_borrow_mut(|state| {
+        let Some(user) = caller.to_user_state(state.to_owned()) else {
+            trap(r#"{"message": "User does not exists"}"#);
+        };
+
         let Some(conversation) = state.conversations.find(conversation_id) else {
             trap(r#"{"message": "Conversation not found"}"#);
         };
 
-        if conversation.users.contains(&caller) {
+        if conversation.users.contains(&user) {
             conversation
                 .to_owned()
                 .messages

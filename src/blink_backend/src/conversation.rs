@@ -3,7 +3,12 @@ use ic_cdk::trap;
 use serde::Deserialize;
 
 use crate::{
-    anon, messages::Message, state::STATE, update_if_some, user::UserTrait, utils::Filter,
+    anon,
+    messages::Message,
+    state::STATE,
+    update_if_some,
+    user::{User, UserTrait},
+    utils::Filter,
     CallerTrait,
 };
 
@@ -12,12 +17,12 @@ use crate::{
 pub struct Conversation {
     pub id: u64,
     pub name: String,
-    pub users: Vec<Principal>,
+    pub users: Vec<User>,
     pub messages: Vec<Message>,
 }
 
 impl Conversation {
-    fn new(id: u64, users: Vec<Principal>, name: String) -> Self {
+    fn new(id: u64, users: Vec<User>, name: String) -> Self {
         Self {
             id,
             users,
@@ -32,24 +37,28 @@ fn create_conversation(users_: Vec<Principal>) {
     let caller = anon!();
     let mut users = vec![caller];
     users.extend(users_);
+    let users: Vec<User> = users
+        .iter()
+        .map(|v| {
+            v.to_user()
+                .unwrap_or_else(|| trap(r#"{"message": "User does not exists"}"#))
+        })
+        .collect();
     STATE.with_borrow_mut(|state| {
         let name = if users.len() == 2 {
             users
+                .clone()
                 .iter()
-                .find(|&&v| v != caller)
+                .find(|v| v.principal != caller)
                 .unwrap()
-                .to_user_state(state.to_owned())
-                .unwrap_or_else(|| trap(r#"{"message": "User does not exists"}"#))
                 .username
+                .clone()
         } else {
             users
+                .clone()
                 .iter()
                 .take(3)
-                .map(|v| {
-                    v.to_user_state(state.to_owned())
-                        .unwrap_or_else(|| trap(r#"{"message": "User does not exists"}"#))
-                        .username
-                })
+                .map(|v| v.username.clone())
                 .collect::<Vec<String>>()
                 .join(", ")
         };
@@ -76,8 +85,12 @@ fn remove_conversation(conversation_id: u64) {
 
         let conversation = state.conversations.get(index).unwrap();
 
+        let Some(user) = caller.to_user_state(state.to_owned()) else {
+            trap(r#"{"message": "User does not exists"}"#);
+        };
+
         // We can safely unwrap because we know that conversation exists
-        if conversation.users.contains(&caller) {
+        if conversation.users.contains(&user) {
             state.conversations.remove(index);
         } else {
             trap(r#"{"message": "You can't remove this conversation"}"#)
@@ -89,11 +102,15 @@ fn remove_conversation(conversation_id: u64) {
 fn update_conversation(conversation_id: u64, name: Option<String>) {
     let caller = anon!();
     STATE.with_borrow_mut(|state| {
+        let Some(user) = caller.to_user_state(state.to_owned()) else {
+            trap(r#"{"message": "User does not exists"}"#);
+        };
+
         let Some(conversation) = state.conversations.find(conversation_id) else {
             trap(r#"{"message": "Conversation not found"}"#);
         };
 
-        let Some(_) = conversation.users.iter().position(|v| *v == caller) else {
+        let Some(_) = conversation.users.iter().position(|v| *v == user) else {
             trap(r#"{"message": "User not in conversation"}"#);
         };
 
@@ -105,10 +122,15 @@ fn update_conversation(conversation_id: u64, name: Option<String>) {
 fn join_conversation(conversation_id: u64) {
     let caller = anon!();
     STATE.with_borrow_mut(|state| {
+        let Some(user) = caller.to_user_state(state.to_owned()) else {
+            trap(r#"{"message": "User does not exists"}"#);
+        };
+
         let Some(conversation) = state.conversations.find(conversation_id) else {
             trap(r#"{"message": "Conversation not found"}"#);
         };
-        conversation.users.push(caller)
+
+        conversation.users.push(user)
     })
 }
 
@@ -116,11 +138,15 @@ fn join_conversation(conversation_id: u64) {
 fn leave_conversation(conversation_id: u64) {
     let caller = anon!();
     STATE.with_borrow_mut(|state| {
+        let Some(user) = caller.to_user_state(state.to_owned()) else {
+            trap(r#"{"message": "User does not exists"}"#);
+        };
+
         let Some(conversation) = state.conversations.find(conversation_id) else {
             trap(r#"{"message": "Conversation not found"}"#);
         };
 
-        let Some(index) = conversation.users.iter().position(|v| *v == caller) else {
+        let Some(index) = conversation.users.iter().position(|v| *v == user) else {
             trap(r#"{"message": "User not in conversation"}"#);
         };
 
@@ -131,5 +157,9 @@ fn leave_conversation(conversation_id: u64) {
 #[ic_cdk::query]
 fn get_user_conversations() -> Vec<Conversation> {
     let caller = anon!();
-    STATE.with_borrow_mut(|state| state.conversations.filter(caller))
+    let Some(user) = caller.to_user() else {
+        trap(r#"{"message": "User does not exists"}"#);
+    };
+
+    STATE.with_borrow_mut(|state| state.conversations.filter(user))
 }

@@ -55,7 +55,7 @@ type LastMessage = record {
 
 type Conversation = record {
     id: nat64;
-    users: vec principal;
+    users: vec User;
     messages: vec Message;
 };
 
