@@ -5,10 +5,10 @@ updates:
       schedule:
           interval: "weekly"
       assignees:
-          - "botprzemek"
+          - "ponurakk"
     - package-ecosystem: "npm"
       directory: "/"
       schedule:
           interval: "weekly"
       assignees:
-          - "botprzemek"
+          - "ponurakk"
