@@ -12,3 +12,9 @@ updates:
           interval: "weekly"
       assignees:
           - "ponurakk"
+    - package-ecosystem: "cargo"
+      directory: "/"
+      schedule:
+          interval: "weekly"
+      assignees:
+          - "ponurakk"
