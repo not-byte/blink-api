@@ -5,6 +5,7 @@ import { RouterView } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useStorageStore } from "@/stores/storage";
 import { Principal } from "@dfinity/principal";
+import { waitFor } from "@/utils/util";
 
 const auth = useAuthStore();
 
@@ -21,6 +22,9 @@ async function logIn() {
   const { getLastMessage } = storeToRefs(auth);
 
   await auth.logIn();
+
+  // Wait until User will log in
+  await waitFor(() => auth.isAnonymous === false);
 
   try {
     // TODO: Get username properly

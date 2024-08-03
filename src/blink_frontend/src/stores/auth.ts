@@ -4,7 +4,6 @@ import { AuthClient } from "@dfinity/auth-client";
 import type { _SERVICE, User } from "../../../declarations/blink_backend/blink_backend.did.js";
 import { canisterId, createActor } from "../../../declarations/blink_backend";
 import { convert } from "@/utils/util";
-import { useStorageStore } from "./storage.js";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -25,6 +24,10 @@ export const useAuthStore = defineStore("auth", {
 
     async getUser(): Promise<User | undefined> {
       return convert(await this.actor?.get_user());
+    },
+
+    isAnonymous(): boolean {
+      return this.identity?.getPrincipal().isAnonymous() ?? true;
     }
   },
   actions: {

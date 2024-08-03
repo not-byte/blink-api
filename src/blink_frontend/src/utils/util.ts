@@ -23,3 +23,12 @@ export function getTime(timestamp: number): string {
 export function trimStr(string: string): string {
   return string.length > 25 ? string.substring(0, 25 - 3) + "..." : string
 }
+
+export function waitFor(conditionFunction: () => boolean): Promise<void> {
+  const poll = (resolve: () => void) => {
+    if (conditionFunction()) resolve();
+    else setTimeout(() => poll(resolve), 400);
+  };
+
+  return new Promise<void>(poll);
+}
