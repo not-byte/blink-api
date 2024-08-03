@@ -89,7 +89,7 @@ macro_rules! anon {
     () => {{
         let caller = ic_cdk::caller();
         if caller.is_anonymous() {
-            trap(r#"{"message": "User is anonymous"}"#);
+            return Err(ErrorKind::Anonymous.into());
         }
         caller
     }};

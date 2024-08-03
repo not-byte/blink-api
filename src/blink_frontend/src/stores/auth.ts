@@ -3,7 +3,7 @@ import type { ActorSubclass, Identity } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import type { _SERVICE, User } from "../../../declarations/blink_backend/blink_backend.did.js";
 import { canisterId, createActor } from "../../../declarations/blink_backend";
-import { convert } from "@/utils/util";
+import { convert, unwrap } from "@/utils/util";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -12,10 +12,10 @@ export const useAuthStore = defineStore("auth", {
     actor: null as ActorSubclass<_SERVICE> | null,
   }),
   getters: {
-    getConversations: async (state) => await state.actor?.get_user_conversations(),
+    getConversations: async (state) => unwrap(await state.actor?.get_user_conversations()),
 
     getLastMessage: (state) => {
-      return async (id: number) => convert(await state.actor?.get_last_message(BigInt(id)));
+      return async (id: number) => convert(unwrap(await state.actor?.get_last_message(BigInt(id))));
     },
 
     getPrincipal: (state) => {
@@ -23,7 +23,7 @@ export const useAuthStore = defineStore("auth", {
     },
 
     async getUser(): Promise<User | undefined> {
-      return convert(await this.actor?.get_user());
+      return convert(unwrap(await this.actor?.get_user()));
     },
 
     isAnonymous(): boolean {

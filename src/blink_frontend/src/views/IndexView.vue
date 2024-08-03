@@ -2,9 +2,8 @@
 import LogoIcon from "@/components/icon/LogoIcon.vue";
 import HeaderComponent from "@/components/HeaderComponent.vue";
 import { useAuthStore } from "@/stores/auth";
-import { computed, onMounted, Ref, ref } from "vue";
+import { computed, Ref, ref } from "vue";
 import { useRouter } from "vue-router";
-import { getError } from "@/utils/util";
 
 const auth = useAuthStore();
 const username: Ref<string> = ref("");
@@ -28,9 +27,8 @@ async function createUser() {
     await router.push("/messages");
   } catch (e) {
     console.groupCollapsed("Error in creating a user");
-    let err = getError(e.message).message;
-    console.error(err);
-    if (err === "User already exists") {
+    console.error(e);
+    if (e.message === "User already exists") {
       hasAccount.value = true;
     }
     console.groupEnd();

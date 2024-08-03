@@ -1,18 +1,19 @@
-use ic_cdk::trap;
+use error::{Error, ErrorKind};
 use state::STATE;
 use user::User;
 use utils::CallerTrait;
 
 mod conversation;
+mod error;
 mod messages;
 mod state;
 mod user;
 mod utils;
 
 #[ic_cdk::query]
-fn greet() -> String {
+fn greet() -> Result<String, Error> {
     let caller = anon!();
-    format!("Your PrincipalId is: {}", caller)
+    Ok(format!("Your PrincipalId is: {}", caller))
 }
 
 #[ic_cdk::query]

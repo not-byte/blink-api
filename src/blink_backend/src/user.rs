@@ -1,6 +1,9 @@
-use crate::{update_if_some, utils::CallerTrait};
+use crate::{
+    error::{Error, ErrorKind},
+    update_if_some,
+    utils::CallerTrait,
+};
 use candid::{CandidType, Principal};
-use ic_cdk::trap;
 use serde::Deserialize;
 
 use crate::{
@@ -83,11 +86,11 @@ impl UserTrait for Principal {
 }
 
 #[ic_cdk::update]
-fn add_user(username: String, avatar: Option<String>) {
+fn add_user(username: String, avatar: Option<String>) -> Result<(), Error> {
     let caller = anon!();
     STATE.with_borrow_mut(|state| {
         if caller.to_user_state(state.to_owned()).is_some() {
-            trap(r#"{"message": "User already exists"}"#);
+            return Err(ErrorKind::UserAlreadyExists.into());
         }
 
         state.users.push(User {
@@ -98,12 +101,13 @@ fn add_user(username: String, avatar: Option<String>) {
             theme: Theme::Dark,
             status: Status::Online,
         });
+        Ok(())
     })
 }
 
 #[ic_cdk::query]
-fn get_user() -> Option<User> {
-    anon!().to_user()
+fn get_user() -> Result<Option<User>, Error> {
+    Ok(anon!().to_user())
 }
 
 #[ic_cdk::update]
@@ -113,10 +117,10 @@ fn update_user(
     language: Option<Language>,
     theme: Option<Theme>,
     status: Option<Status>,
-) {
+) -> Result<(), Error> {
     let caller = anon!();
     let Some(user) = caller.to_user_mut() else {
-        trap(r#"{"message": "User not found"}"#);
+        return Err(ErrorKind::UserDoesNotExist.into());
     };
 
     update_if_some!(user.username, username);
@@ -124,4 +128,5 @@ fn update_user(
     update_if_some!(user.language, language);
     update_if_some!(user.theme, theme);
     update_if_some!(user.status, status);
+    Ok(())
 }

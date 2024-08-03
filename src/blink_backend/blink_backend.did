@@ -60,25 +60,67 @@ type Conversation = record {
     messages: vec Message;
 };
 
+type Error = record {
+    message: text;
+};
+
+// Why generics don't exist here???
+
+type Result = variant {
+    Ok: null;
+    Err: Error;
+};
+
+type ResultText = variant {
+    Ok: text;
+    Err: Error;
+};
+
+type ResultConversation = variant {
+    Ok: Conversation;
+    Err: Error;
+};
+
+type ResultLastMessage = variant {
+    Ok: opt LastMessage;
+    Err: Error;
+};
+
+type ResultWithId = variant {
+    Ok: nat64;
+    Err: Error;
+};
+
+type ResultUserConversations = variant {
+    Ok: vec Conversation;
+    Err: Error;
+};
+
+type ResultUser = variant {
+    Ok: opt User;
+    Err: Error;
+};
+
 service : {
-    create_conversation: (vec principal) -> (nat64);
-    remove_conversation: (nat64) -> ();
-    add_to_conversation: (nat64, vec principal) -> ();
-    leave_conversation: (nat64) -> ();
-    get_user_conversations: () -> (vec Conversation) query;
+    create_conversation: (vec principal) -> (ResultWithId);
+    remove_conversation: (nat64) -> (Result);
+    update_conversation: (nat64, opt text) -> (Result);
+    add_to_conversation: (nat64, vec principal) -> (Result);
+    leave_conversation: (nat64) -> (Result);
+    get_user_conversations: () -> (ResultUserConversations) query;
 
-    send_message: (nat64, text) -> ();
-    send_image: (nat64, text, text) -> ();
-    get_messages: (nat64) -> (Conversation) query;
-    remove_message: (nat64, nat64) -> ();
-    update_message: (nat64, nat64, text) -> ();
-    get_last_message: (nat64) -> (opt LastMessage) query;
+    send_message: (nat64, text) -> (ResultWithId);
+    send_image: (nat64, text, text) -> (ResultWithId);
+    get_messages: (nat64) -> (ResultConversation) query;
+    remove_message: (nat64, nat64) -> (Result);
+    update_message: (nat64, nat64, text) -> (Result);
+    get_last_message: (nat64) -> (ResultLastMessage) query;
 
-    get_user: () -> (opt User) query;
-    add_user: (text, opt text) -> ();
-    update_user: (opt text, opt text, opt Language, opt Theme, opt Status) -> ();
+    get_user: () -> (ResultUser) query;
+    add_user: (text, opt text) -> (Result);
+    update_user: (opt text, opt text, opt Language, opt Theme, opt Status) -> (Result);
 
-    greet: () -> (text) query;
+    greet: () -> (ResultText) query;
 
     // For canister contest
     get_users: () -> (vec User) query;

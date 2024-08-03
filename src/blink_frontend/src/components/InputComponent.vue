@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/stores/auth";
+import { unwrap } from "@/utils/util";
 import { ref, Ref } from "vue";
 const props = defineProps<{
   conversation_id: number;
@@ -13,7 +14,7 @@ async function send() {
     throw new Error("Message can't be empty");
   }
 
-  await auth.actor?.send_message(BigInt(props.conversation_id), message.value);
+  unwrap(await auth.actor?.send_message(BigInt(props.conversation_id), message.value));
 
   message.value = "";
 

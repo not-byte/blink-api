@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useAuthStore } from "@/stores/auth";
 import { useStorageStore } from "@/stores/storage";
-import { getError, convert } from "@/utils/util";
+import { convert, unwrap, extractId } from "@/utils/util";
 import type { User, Conversation } from "@declarations/blink_backend.did";
 import { Principal } from "@dfinity/principal";
 import { ref, Ref } from "vue";
@@ -15,15 +15,15 @@ const router = useRouter();
 async function createConversation(user: Principal) {
   let conversation_id = 0;
   try {
-    conversation_id = Number(await auth?.actor.create_conversation([user]));
-    const conversations: Conversation[] = await auth.actor?.get_user_conversations();
+    conversation_id = Number(unwrap(await auth?.actor.create_conversation([user])));
+    const conversations: Conversation[] = unwrap(await auth.actor?.get_user_conversations());
     storage.setConversations(conversations);
     await router.push(`/messages/${conversation_id}`);
   } catch (e) {
-    let err = getError(e.message).message;
-    console.error(err);
-    if (err == "Conversation already exists") {
-      await router.push(`/messages/${conversation_id}`);
+    console.error(e);
+    if (e.message.startsWith("Conversation already exists")) {
+      let id = extractId(e.message);
+      await router.push(`/messages/${id}`);
     }
   }
 }

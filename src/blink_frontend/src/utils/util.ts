@@ -1,3 +1,6 @@
+import type { Result } from "@declarations/blink_backend.did";
+import type { ResultConversation, ResultLastMessage, ResultText, ResultUser, ResultUserConversations, ResultWithId } from "../../../declarations/blink_backend/blink_backend.did";
+
 export function convert<T>(input: [] | [T] | undefined): T | undefined {
   if (input === undefined) {
     return undefined;
@@ -35,17 +38,24 @@ export async function sleep(millis: number) {
   return new Promise(resolve => setTimeout(resolve, millis));
 }
 
-export function getError(rejectText: string): { message: string } {
-  // Check if it contains the JSON part and extract it
-  const jsonMatch = rejectText.match(/Canister trapped explicitly:\s*(\{.*\})/);
-  if (jsonMatch && jsonMatch[1]) {
-    try {
-      const jsonData = JSON.parse(jsonMatch[1]);
-      return jsonData;
-    } catch (parseError) {
-      return { message: rejectText };
-    }
-  } else {
-    return { message: rejectText };
+type Results = Result | ResultText | ResultConversation | ResultLastMessage | ResultWithId | ResultUserConversations | ResultUser;
+type UnwrapResult<T> = T extends { Ok: infer U } ? U : never;
+
+export function unwrap<T extends Results>(result: T): UnwrapResult<T> {
+  if (!result || typeof result !== 'object') {
+    throw new Error("Invalid result: Expected an object, got undefined or non-object");
   }
+
+  if ('Err' in result) {
+    throw result.Err;
+  }
+  return result.Ok;
+}
+
+export function extractId(message: string): number | null {
+  const parts = message.split(':');
+  if (parts.length > 1) {
+    return parseInt(parts[1].trim(), 10);
+  }
+  return null;
 }

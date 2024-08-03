@@ -1,10 +1,10 @@
 use candid::{CandidType, Principal};
-use ic_cdk::trap;
 use serde::Deserialize;
 
 use crate::{
     anon,
     conversation::Conversation,
+    error::{Error, ErrorKind},
     state::STATE,
     user::{User, UserTrait},
     utils::{CallerTrait, Filter},
@@ -44,97 +44,103 @@ pub struct LastMessage {
 }
 
 #[ic_cdk::update]
-fn send_message(conversation_id: u64, content: String) {
+fn send_message(conversation_id: u64, content: String) -> Result<u64, Error> {
     let caller = anon!();
     let timestamp = ic_cdk::api::time() / 1_000_000;
 
     STATE.with_borrow_mut(|state| {
         let Some(user) = caller.to_user_state(state.to_owned()) else {
-            trap(r#"{"message": "User does not exists"}"#);
+            return Err(ErrorKind::UserDoesNotExist.into());
         };
 
         let Some(conversation) = state.conversations.find(conversation_id) else {
-            trap(r#"{"message": "Conversation not found"}"#);
+            return Err(ErrorKind::ConversationNotFound.into());
         };
 
         if !conversation.users.contains(&user) {
-            trap(r#"{"message": "User not in conversation"}"#);
+            return Err(ErrorKind::UserNotInConversation.into());
         }
 
+        let last_id = conversation.messages.get_last_id() + 1;
+
         let message = Message {
-            id: conversation.messages.get_last_id() + 1,
+            id: last_id,
             message: MessageContent::Text(Text { content }),
             caller,
             timestamp,
         };
 
         conversation.messages.push(message);
+        Ok(last_id)
     })
 }
 
 #[ic_cdk::update]
-fn send_image(conversation_id: u64, image: String, name: String) {
+fn send_image(conversation_id: u64, image: String, name: String) -> Result<u64, Error> {
     let caller = anon!();
     let timestamp = ic_cdk::api::time() / 1_000_000;
 
     STATE.with_borrow_mut(|state| {
         let Some(user) = caller.to_user_state(state.to_owned()) else {
-            trap(r#"{"message": "User does not exists"}"#);
+            return Err(ErrorKind::UserDoesNotExist.into());
         };
 
         let Some(conversation) = state.conversations.find(conversation_id) else {
-            trap(r#"{"message": "Conversation not found"}"#);
+            return Err(ErrorKind::ConversationNotFound.into());
         };
 
         if !conversation.users.contains(&user) {
-            trap(r#"{"message": "User not in conversation"}"#);
+            return Err(ErrorKind::UserNotInConversation.into());
         }
 
+        let last_id = conversation.messages.get_last_id() + 1;
+
         let message = Message {
-            id: conversation.messages.get_last_id() + 1,
+            id: last_id,
             message: MessageContent::Image(Image { src: image, name }),
             caller,
             timestamp,
         };
 
         conversation.messages.push(message);
+        Ok(last_id)
     })
 }
 
 #[ic_cdk::query]
-fn get_messages(conversation_id: u64) -> Conversation {
+fn get_messages(conversation_id: u64) -> Result<Conversation, Error> {
     let caller = anon!();
     STATE.with_borrow_mut(|state| {
         let Some(user) = caller.to_user_state(state.to_owned()) else {
-            trap(r#"{"message": "User does not exists"}"#);
+            return Err(ErrorKind::UserDoesNotExist.into());
         };
 
         let Some(conversation) = state.conversations.find(conversation_id) else {
-            trap(r#"{"message": "Conversation not found"}"#);
+            return Err(ErrorKind::ConversationNotFound.into());
         };
 
         if conversation.users.contains(&user) {
-            conversation.to_owned()
+            Ok(conversation.to_owned())
         } else {
-            trap(r#"{"message": "You can't access other conversations"}"#);
+            return Err(ErrorKind::CantAccess.into());
         }
     })
 }
 
 #[ic_cdk::query]
-fn get_last_message(conversation_id: u64) -> Option<LastMessage> {
+fn get_last_message(conversation_id: u64) -> Result<Option<LastMessage>, Error> {
     let caller = anon!();
     STATE.with_borrow_mut(|state| {
         let Some(user) = caller.to_user_state(state.to_owned()) else {
-            trap(r#"{"message": "User does not exists"}"#);
+            return Err(ErrorKind::UserDoesNotExist.into());
         };
 
         let Some(conversation) = state.conversations.find(conversation_id) else {
-            trap(r#"{"message": "Conversation not found"}"#);
+            return Err(ErrorKind::ConversationNotFound.into());
         };
 
         if conversation.users.contains(&user) {
-            conversation
+            Ok(conversation
                 .to_owned()
                 .messages
                 .last()
@@ -150,57 +156,59 @@ fn get_last_message(conversation_id: u64) -> Option<LastMessage> {
                     // for looking at other users configuration
                     user: v.caller.to_user_state(state.to_owned()).unwrap(),
                     // user: v.caller,
-                })
+                }))
         } else {
-            trap(r#"{"message": "You can't access other conversations"}"#);
+            return Err(ErrorKind::CantAccess.into());
         }
     })
 }
 
 #[ic_cdk::update]
-fn remove_message(conversation_id: u64, id: u64) {
+fn remove_message(conversation_id: u64, id: u64) -> Result<(), Error> {
     let caller = anon!();
     STATE.with_borrow_mut(|state| {
         let Some(conversation) = state.conversations.find(conversation_id) else {
-            trap(r#"{"message": "Conversation not found"}"#);
+            return Err(ErrorKind::ConversationNotFound.into());
         };
 
         let Some(index) = conversation.messages.iter().position(|v| v.id == id) else {
-            trap(r#"{"message": "Message not found"}"#);
+            return Err(ErrorKind::MessageNotFound.into());
         };
 
         // We can safely unwrap because we know that message exists
         if conversation.messages.get(index).unwrap().caller == caller {
             conversation.messages.remove(index);
+            Ok(())
         } else {
-            trap(r#"{"message": "You can only remove your own messages"}"#)
+            return Err(ErrorKind::CantAccess.into());
         }
-    });
+    })
 }
 
 #[ic_cdk::update]
-fn update_message(conversation_id: u64, id: u64, new_message: String) {
+fn update_message(conversation_id: u64, id: u64, new_message: String) -> Result<(), Error> {
     let caller = anon!();
     STATE.with_borrow_mut(|state| {
         let Some(conversation) = state.conversations.find(conversation_id) else {
-            trap(r#"{"message": "Conversation not found"}"#);
+            return Err(ErrorKind::ConversationNotFound.into());
         };
 
         let Some(index) = conversation.messages.iter().position(|v| v.id == id) else {
-            trap(r#"{"message": "Message not found"}"#);
+            return Err(ErrorKind::MessageNotFound.into());
         };
 
         if let Some(v) = conversation.messages.get_mut(index) {
             match v.message {
                 MessageContent::Text(ref mut text) => {
                     if v.caller == caller {
-                        text.content = new_message.clone()
+                        text.content = new_message.clone();
                     } else {
-                        trap(r#"{"message": "You can only edit your own messages"}"#)
+                        return Err(ErrorKind::CantEdit.into());
                     }
                 }
-                _ => trap(r#"{"message": "You can only edit a text message"}"#),
+                _ => return Err(ErrorKind::CantEdit.into()),
             }
         }
-    });
+        Ok(())
+    })
 }

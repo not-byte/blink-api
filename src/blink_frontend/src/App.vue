@@ -5,7 +5,7 @@ import { RouterView } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useStorageStore } from "@/stores/storage";
 import { Principal } from "@dfinity/principal";
-import { getError, waitFor } from "@/utils/util";
+import { unwrap, waitFor } from "@/utils/util";
 
 const auth = useAuthStore();
 const storage = useStorageStore();
@@ -31,7 +31,7 @@ async function logIn() {
   try {
     update();
   } catch (e) {
-    console.error(getError(e).message);
+    console.error(e);
   }
 }
 
@@ -40,7 +40,7 @@ async function update() {
   // NOTE: For some reason this doesn't work?
   const _conversations: Conversation[] = await auth.getConversations;
   // NOTE: But works if fetched twice?
-  const conversations: Conversation[] = await auth.actor?.get_user_conversations();
+  const conversations: Conversation[] = unwrap(await auth.actor?.get_user_conversations());
   storage.setConversations(conversations);
 
   // Set last messages
@@ -57,14 +57,18 @@ async function update() {
 }
 
 setInterval(async () => {
-  update();
+  try {
+    update();
+  } catch (e) {
+    console.error(e);
+  }
 }, 2000);
 
 (async () => {
   await auth.setAuthClient();
   try {
     verifyLogin();
-  } catch {
+  } catch (e) {
     console.error("Not logged in");
     await logIn();
   }
