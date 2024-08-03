@@ -63,7 +63,7 @@ type Conversation = record {
 service : {
     create_conversation: (vec principal) -> ();
     remove_conversation: (nat64) -> ();
-    join_conversation: (nat64) -> ();
+    add_to_conversation: (nat64, vec principal) -> ();
     leave_conversation: (nat64) -> ();
     get_user_conversations: () -> (vec Conversation) query;
 

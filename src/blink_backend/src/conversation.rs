@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use candid::{CandidType, Principal};
 use ic_cdk::trap;
 use serde::Deserialize;
@@ -128,18 +130,33 @@ fn update_conversation(conversation_id: u64, name: Option<String>) {
 }
 
 #[ic_cdk::update]
-fn join_conversation(conversation_id: u64) {
+fn add_to_conversation(conversation_id: u64, principals: Vec<Principal>) {
     let caller = anon!();
     STATE.with_borrow_mut(|state| {
         let Some(user) = caller.to_user_state(state.to_owned()) else {
             trap(r#"{"message": "User does not exists"}"#);
         };
 
+        let users: Vec<User> = principals
+            .iter()
+            .map(|v| {
+                v.to_user_state(state.to_owned()).unwrap_or_else(|| {
+                    trap(format!(r#"{{"message": "User does not exists"}}"#).as_str())
+                })
+            })
+            .collect();
+
         let Some(conversation) = state.conversations.find(conversation_id) else {
             trap(r#"{"message": "Conversation not found"}"#);
         };
 
-        conversation.users.push(user)
+        let Some(_) = conversation.users.iter().position(|v| *v == user) else {
+            trap(r#"{"message": "User not in conversation"}"#);
+        };
+
+        conversation.users.extend(users);
+        let set: HashSet<_> = conversation.users.drain(..).collect(); // dedup
+        conversation.users.extend(set.into_iter());
     })
 }
 
