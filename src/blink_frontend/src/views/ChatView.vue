@@ -3,7 +3,8 @@ import HeaderComponent from "@/components/HeaderComponent.vue";
 import NavigationComponent from "@/components/NavigationComponent.vue";
 import InputComponent from "@/components/InputComponent.vue";
 import MessageComponent from "@/components/MessageComponent.vue";
-import { Conversation, User } from "../../../declarations/blink_backend/blink_backend.did.js";
+import { User } from "../../../declarations/blink_backend/blink_backend.did.js";
+import type { Conversation } from "@/types/conversation";
 import { Ref, ref } from "vue";
 import { useRoute } from 'vue-router'
 import { useStorageStore } from "@/stores/storage";
@@ -20,9 +21,11 @@ const auth = useAuthStore();
 const my_principal = auth.identity.getPrincipal();
 
 const storage = useStorageStore();
+const { getConversation } = storeToRefs(storage);
+conversation.value = getConversation.value(id) as Conversation;
+
 storage.$subscribe((_, _state) => {
-  const { getConversation } = storeToRefs(storage);
-  conversation.value = getConversation.value(id);
+  conversation.value = getConversation.value(id) as Conversation;
   console.log("new_conv:", getConversation.value(id));
 })
 
@@ -52,7 +55,7 @@ function getUser(principal: Principal): string {
     <HeaderComponent :title="conversation?.name ?? ''" />
     <p>Status: Offline</p>
     <article class="flex-grow flex flex-col gap-3 rounded-xl overflow-y-scroll no-scrollbar">
-      <template v-for="message in conversation.messages ?? []" :key="message.id">
+      <template v-for="message in conversation?.messages ?? []" :key="message.id">
         <template v-if="message.message.Text">
           <MessageComponent :message="message.message.Text.content" :sender="getUser(message.caller)"
             :timestamp="message.timestamp" />

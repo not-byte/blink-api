@@ -21,7 +21,9 @@ async function logIn() {
   const storage = useStorageStore();
   const { getLastMessage } = storeToRefs(auth);
 
-  await auth.logIn();
+  if (auth.isAnonymous) {
+    await auth.logIn();
+  }
 
   // Wait until User will log in
   await waitFor(() => auth.isAnonymous === false);
