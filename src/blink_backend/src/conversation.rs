@@ -8,7 +8,7 @@ use crate::{
     state::STATE,
     update_if_some,
     user::{User, UserTrait},
-    utils::Filter,
+    utils::{iters_equal_anyorder, Filter},
     CallerTrait,
 };
 
@@ -62,6 +62,15 @@ fn create_conversation(users_: Vec<Principal>) {
                 .collect::<Vec<String>>()
                 .join(", ")
         };
+
+        let existing = state
+            .conversations
+            .iter()
+            .find(|v| iters_equal_anyorder(v.users.clone().into_iter(), users.clone().into_iter()));
+
+        if existing.is_some() {
+            trap(r#"{"message": "Conversation already exists"}"#);
+        }
 
         state.conversations.push(Conversation::new(
             state.conversations.get_last_id() + 1,

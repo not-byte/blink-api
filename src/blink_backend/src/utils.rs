@@ -1,4 +1,6 @@
 use candid::Principal;
+use std::collections::{hash_map::Entry, HashMap};
+use std::hash::Hash;
 
 use crate::{conversation::Conversation, messages::Message, user::User};
 
@@ -59,6 +61,27 @@ impl Filter<Message> for Vec<Message> {
     fn find(&mut self, id: u64) -> Option<&mut Message> {
         unimplemented!()
     }
+}
+
+pub fn iters_equal_anyorder<T: Eq + Hash>(
+    i1: impl Iterator<Item = T>,
+    i2: impl Iterator<Item = T>,
+) -> bool {
+    fn get_lookup<T: Eq + Hash>(iter: impl Iterator<Item = T>) -> HashMap<T, usize> {
+        let mut lookup = HashMap::<T, usize>::new();
+        for value in iter {
+            match lookup.entry(value) {
+                Entry::Occupied(entry) => {
+                    *entry.into_mut() += 1;
+                }
+                Entry::Vacant(entry) => {
+                    entry.insert(0);
+                }
+            }
+        }
+        lookup
+    }
+    get_lookup(i1) == get_lookup(i2)
 }
 
 #[macro_export]
