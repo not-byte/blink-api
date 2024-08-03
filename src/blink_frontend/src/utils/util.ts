@@ -10,13 +10,12 @@ export function convert<T>(input: [] | [T] | undefined): T | undefined {
 
 export function getTime(timestamp: number): string {
   // Create a new JavaScript Date object based on the timestamp
-  // multiplied by 1000 so that the argument is in milliseconds, not seconds
-  const date = new Date(timestamp * 1000);
+  const date = new Date(timestamp);
   const hours = date.getHours();
   const minutes = "0" + date.getMinutes();
-  const formattedTime = hours + ':' + minutes.substr(-2);
+  const formattedTime = hours + ':' + minutes.slice(-2);
 
-  return formattedTime
+  return formattedTime;
 }
 
 export function trimStr(string: string): string {
@@ -33,5 +32,5 @@ export function waitFor(conditionFunction: () => boolean): Promise<void> {
 }
 
 export async function sleep(millis: number) {
-    return new Promise(resolve => setTimeout(resolve, millis));
+  return new Promise(resolve => setTimeout(resolve, millis));
 }
