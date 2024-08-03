@@ -1,4 +1,3 @@
-use conversation::Conversation;
 use ic_cdk::trap;
 use state::STATE;
 use user::User;
@@ -16,13 +15,7 @@ fn greet() -> String {
     format!("Your PrincipalId is: {}", caller)
 }
 
-// NOTE: Remove in prod
 #[ic_cdk::query]
-fn get_all() -> Vec<Conversation> {
-    // let caller = anon!();
-    // ic_cdk::println!("{:#?}", caller);
-    STATE.with_borrow_mut(|state| {
-        ic_cdk::println!("{:#?}", state.users);
-        return state.conversations.clone();
-    })
+fn get_users() -> Vec<User> {
+    STATE.with_borrow(|v| v.users.clone())
 }

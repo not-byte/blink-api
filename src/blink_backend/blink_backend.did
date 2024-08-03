@@ -61,7 +61,7 @@ type Conversation = record {
 };
 
 service : {
-    create_conversation: (vec principal) -> ();
+    create_conversation: (vec principal) -> (nat64);
     remove_conversation: (nat64) -> ();
     add_to_conversation: (nat64, vec principal) -> ();
     leave_conversation: (nat64) -> ();
@@ -80,6 +80,6 @@ service : {
 
     greet: () -> (text) query;
 
-    // Remove in prod
-    get_all: () -> (vec Conversation) query;
+    // For canister contest
+    get_users: () -> (vec User) query;
 }

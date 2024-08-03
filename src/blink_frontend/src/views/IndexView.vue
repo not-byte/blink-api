@@ -25,8 +25,8 @@ async function createUser() {
     } else {
       await auth.addUser(username.value, avatar.value);
     }
-    router.push("/messages");
-  } catch(e) {
+    await router.push("/messages");
+  } catch (e) {
     console.groupCollapsed("Error in creating a user");
     let err = getError(e.message).message;
     console.error(err);
@@ -56,25 +56,32 @@ auth.$subscribe(async () => {
     <div class="flex flex-col gap-6 transition-root relative">
       <template v-if="!hasAccount">
         <aside class="w-full h-fit px-5 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
-          <input class="w-full bg-transparent outline-none placeholder:text-white" placeholder="Username" type="text" v-model="username" />
+          <input class="w-full bg-transparent outline-none placeholder:text-white" placeholder="Username" type="text"
+            v-model="username" />
         </aside>
         <aside class="w-full h-fit px-5 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
-          <input class="w-full bg-transparent outline-none placeholder:text-white" placeholder="Link to avatar (Optional)" type="text" v-model="avatar" />
+          <input class="w-full bg-transparent outline-none placeholder:text-white"
+            placeholder="Link to avatar (Optional)" type="text" v-model="avatar" />
         </aside>
 
-        <button class="w-full h-fit px-5 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl text-center" @click="createUser" >
+        <button
+          class="w-full h-fit px-5 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl text-center"
+          @click="createUser">
           Join now
         </button>
       </template>
       <template v-else>
-        <router-link class="w-full h-fit px-5 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl text-center" to="/messages" >
+        <router-link
+          class="w-full h-fit px-5 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl text-center"
+          to="/messages">
           Continue
         </router-link>
       </template>
 
       <template v-if="isAnon">
         <div class="backdrop-blur-[2px] w-full h-full absolute rounded-xl">
-          <h1 class="fixed -top-10 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl whitespace-nowrap">Waiting for login...</h1>
+          <h1 class="fixed -top-10 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl whitespace-nowrap">Waiting for
+            login...</h1>
         </div>
       </template>
     </div>

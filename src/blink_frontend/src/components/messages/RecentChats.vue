@@ -13,7 +13,6 @@ const auth = useAuthStore();
 storage.$subscribe((_, state) => {
   const { getLastMessages } = storeToRefs(storage);
   last_messages.value = getLastMessages.value;
-  console.log("Last messages", last_messages.value);
 });
 </script>
 

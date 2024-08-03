@@ -12,7 +12,7 @@ const storage = useStorageStore();
 const { getLastMessage } = storeToRefs(auth);
 
 function verifyLogin() {
-  console.info("verifylogin");
+  console.info("Verifing login...");
   if (auth.identity === undefined || auth.identity.getPrincipal() == Principal.anonymous()) {
     throw new Error("Not logged in")
   }
@@ -31,7 +31,7 @@ async function logIn() {
   try {
     update();
   } catch (e) {
-    console.error(e);
+    console.error(getError(e).message);
   }
 }
 

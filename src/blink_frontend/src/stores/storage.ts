@@ -10,7 +10,6 @@ export const useStorageStore = defineStore("storage", {
   }),
   getters: {
     getLastMessages: (state) => {
-      console.warn(state.last_messages);
       return state.last_messages.map((v: LastMessage) => ({
         conversation_id: Number(v.conversation_id),
         user: {

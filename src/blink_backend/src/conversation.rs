@@ -35,7 +35,7 @@ impl Conversation {
 }
 
 #[ic_cdk::update]
-fn create_conversation(users_: Vec<Principal>) {
+fn create_conversation(users_: Vec<Principal>) -> u64 {
     let caller = anon!();
     let mut users = vec![caller];
     users.extend(users_);
@@ -74,11 +74,11 @@ fn create_conversation(users_: Vec<Principal>) {
             trap(r#"{"message": "Conversation already exists"}"#);
         }
 
-        state.conversations.push(Conversation::new(
-            state.conversations.get_last_id() + 1,
-            users,
-            name,
-        ));
+        let last_id = state.conversations.get_last_id() + 1;
+        state
+            .conversations
+            .push(Conversation::new(last_id, users, name));
+        last_id
     })
 }
 
