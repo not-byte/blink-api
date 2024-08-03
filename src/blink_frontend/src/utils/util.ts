@@ -34,3 +34,18 @@ export function waitFor(conditionFunction: () => boolean): Promise<void> {
 export async function sleep(millis: number) {
   return new Promise(resolve => setTimeout(resolve, millis));
 }
+
+export function getError(rejectText: string): { message: string } {
+  // Check if it contains the JSON part and extract it
+  const jsonMatch = rejectText.match(/Canister trapped explicitly:\s*(\{.*\})/);
+  if (jsonMatch && jsonMatch[1]) {
+    try {
+      const jsonData = JSON.parse(jsonMatch[1]);
+      return jsonData;
+    } catch (parseError) {
+      return { message: rejectText };
+    }
+  } else {
+    return { message: rejectText };
+  }
+}

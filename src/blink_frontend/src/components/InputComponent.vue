@@ -1,17 +1,11 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/stores/auth";
-import { useStorageStore } from "@/stores/storage";
 import { ref, Ref } from "vue";
 const props = defineProps<{
   conversation_id: number;
 }>();
 
-const emit = defineEmits<{
-  (e: "scroll"): void,
-}>();
-
 const auth = useAuthStore();
-const storage = useStorageStore();
 const message: Ref<string> = ref("");
 
 async function send() {
@@ -21,16 +15,10 @@ async function send() {
 
   await auth.actor?.send_message(BigInt(props.conversation_id), message.value);
 
-  const messageTmp = message.value;
   message.value = "";
 
   const conversations = [];
-  console.log("new_", conversations);
-
-  if (conversations !== undefined) {
-    storage.addMessage(props.conversation_id, messageTmp);
-    emit("scroll");
-  } else {
+  if (conversations === undefined) {
     throw new Error("Failed to get conversations");
   }
 }

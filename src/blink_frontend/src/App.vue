@@ -5,12 +5,14 @@ import { RouterView } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useStorageStore } from "@/stores/storage";
 import { Principal } from "@dfinity/principal";
-import { waitFor } from "@/utils/util";
+import { getError, waitFor } from "@/utils/util";
 
 const auth = useAuthStore();
+const storage = useStorageStore();
+const { getLastMessage } = storeToRefs(auth);
 
 function verifyLogin() {
-  console.log("verifylogin");
+  console.info("verifylogin");
   if (auth.identity === undefined || auth.identity.getPrincipal() == Principal.anonymous()) {
     throw new Error("Not logged in")
   }
@@ -18,8 +20,6 @@ function verifyLogin() {
 
 async function logIn() {
   if (!auth.authClient) throw new Error("AuthClient not initialized");
-  const storage = useStorageStore();
-  const { getLastMessage } = storeToRefs(auth);
 
   if (auth.isAnonymous) {
     await auth.logIn();
@@ -29,35 +29,36 @@ async function logIn() {
   await waitFor(() => auth.isAnonymous === false);
 
   try {
-    // TODO: Get username properly
-    await auth.addUser("Me");
-  } catch (e) {
-    console.groupCollapsed("User already exists");
-    console.error(e);
-    console.groupEnd();
-  }
-
-  try {
-    // Set conversations
-    const conversations: Conversation[] = await auth.getConversations;
-    storage.setConversations(conversations);
-    console.log("test:", storage.conversations);
-
-    // Set last messages
-    const ids = conversations.map(v => v.id);
-    let conversations_parsed: LastMessage[] = [];
-    conversations_parsed = await Promise.all(ids.map(async id => {
-      return await getLastMessage.value(id);
-    }));
-    storage.setLastMessages(conversations_parsed);
-
-    // Set user
-    const user: User = await auth.getUser;
-    storage.setUser(user);
+    update();
   } catch (e) {
     console.error(e);
   }
 }
+
+async function update() {
+  // Set conversations
+  // NOTE: For some reason this doesn't work?
+  const _conversations: Conversation[] = await auth.getConversations;
+  // NOTE: But works if fetched twice?
+  const conversations: Conversation[] = await auth.actor?.get_user_conversations();
+  storage.setConversations(conversations);
+
+  // Set last messages
+  const ids = conversations.map(v => v.id);
+  let conversations_parsed: LastMessage[] = [];
+  conversations_parsed = await Promise.all(ids.map(async id => {
+    return await getLastMessage.value(id);
+  }));
+  storage.setLastMessages(conversations_parsed);
+
+  // Set user
+  const user: User = await auth.getUser;
+  storage.setUser(user);
+}
+
+setInterval(async () => {
+  update();
+}, 2000);
 
 (async () => {
   await auth.setAuthClient();
