@@ -22,7 +22,7 @@ export const useStorageStore = defineStore("storage", {
         timestamp: Number(v.timestamp),
       }));
     },
-    
+
     getConversation: (state) => {
       return (id: number) => {
         const new_conversation = state.conversations.find((conversation: Conversation) => conversation.id == BigInt(id))
@@ -52,6 +52,26 @@ export const useStorageStore = defineStore("storage", {
 
     setConversations(conversations: Conversation[]) {
       this.conversations = conversations;
+    },
+
+    addMessage(conversation_id: number, content: string) {
+      const conversation = this.conversations.find(
+        (conversation: Conversation) => conversation.id === BigInt(conversation_id)
+      );
+
+      if (!conversation) {
+        console.error('Conversation not found');
+        return;
+      }
+
+      const new_message: Message = {
+        id: BigInt(conversation.messages.length),
+        caller: this.user?.principal,
+        message: { Text: { content } },
+        timestamp: BigInt(Date.now())
+      };
+
+      conversation.messages.push(new_message);
     }
   }
 });

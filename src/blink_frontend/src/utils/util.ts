@@ -8,7 +8,6 @@ export function convert<T>(input: [] | [T] | undefined): T | undefined {
   }
 }
 
-
 export function getTime(timestamp: number): string {
   // Create a new JavaScript Date object based on the timestamp
   // multiplied by 1000 so that the argument is in milliseconds, not seconds
@@ -31,4 +30,8 @@ export function waitFor(conditionFunction: () => boolean): Promise<void> {
   };
 
   return new Promise<void>(poll);
+}
+
+export async function sleep(millis: number) {
+    return new Promise(resolve => setTimeout(resolve, millis));
 }

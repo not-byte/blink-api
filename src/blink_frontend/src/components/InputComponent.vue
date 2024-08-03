@@ -6,6 +6,10 @@ const props = defineProps<{
   conversation_id: number;
 }>();
 
+const emit = defineEmits<{
+  (e: "scroll"): void,
+}>();
+
 const auth = useAuthStore();
 const storage = useStorageStore();
 const message: Ref<string> = ref("");
@@ -16,11 +20,16 @@ async function send() {
   }
 
   await auth.actor?.send_message(BigInt(props.conversation_id), message.value);
+
+  const messageTmp = message.value;
   message.value = "";
-  const conversations = await auth.getConversations;
+
+  const conversations = [];
+  console.log("new_", conversations);
 
   if (conversations !== undefined) {
-    storage.setConversations(conversations);
+    storage.addMessage(props.conversation_id, messageTmp);
+    emit("scroll");
   } else {
     throw new Error("Failed to get conversations");
   }
