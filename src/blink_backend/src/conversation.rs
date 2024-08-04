@@ -102,7 +102,11 @@ fn remove_conversation(conversation_id: u64) -> Result<(), Error> {
 
         let conversation = state.conversations.get(index).unwrap();
 
-        let Some(_) = conversation.users.iter().position(|v| *v == user) else {
+        let Some(_) = conversation
+            .users
+            .iter()
+            .find(|v| v.principal == user.principal)
+        else {
             return Err(ErrorKind::UserNotInConversation.into());
         };
 
@@ -128,7 +132,11 @@ fn update_conversation(conversation_id: u64, name: Option<String>) -> Result<(),
             return Err(ErrorKind::ConversationNotFound.into());
         };
 
-        let Some(_) = conversation.users.iter().position(|v| *v == user) else {
+        let Some(_) = conversation
+            .users
+            .iter()
+            .position(|v| v.principal == user.principal)
+        else {
             return Err(ErrorKind::UserNotInConversation.into());
         };
 

@@ -57,9 +57,13 @@ fn send_message(conversation_id: u64, content: String) -> Result<u64, Error> {
             return Err(ErrorKind::ConversationNotFound.into());
         };
 
-        if !conversation.users.contains(&user) {
+        let Some(_) = conversation
+            .users
+            .iter()
+            .find(|v| v.principal == user.principal)
+        else {
             return Err(ErrorKind::UserNotInConversation.into());
-        }
+        };
 
         let last_id = conversation.messages.get_last_id() + 1;
 
@@ -89,9 +93,13 @@ fn send_image(conversation_id: u64, image: String, name: String) -> Result<u64, 
             return Err(ErrorKind::ConversationNotFound.into());
         };
 
-        if !conversation.users.contains(&user) {
+        let Some(_) = conversation
+            .users
+            .iter()
+            .find(|v| v.principal == user.principal)
+        else {
             return Err(ErrorKind::UserNotInConversation.into());
-        }
+        };
 
         let last_id = conversation.messages.get_last_id() + 1;
 

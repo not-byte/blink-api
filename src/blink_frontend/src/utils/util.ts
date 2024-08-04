@@ -43,7 +43,8 @@ type UnwrapResult<T> = T extends { Ok: infer U } ? U : never;
 
 export function unwrap<T extends Results>(result: T): UnwrapResult<T> {
   if (!result || typeof result !== 'object') {
-    throw new Error("Invalid result: Expected an object, got undefined or non-object");
+    throw result;
+    // throw new Error("Invalid result: Expected an object, got undefined or non-object");
   }
 
   if ('Err' in result) {

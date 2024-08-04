@@ -29,7 +29,8 @@ async function createConversation(user: Principal) {
 }
 
 (async () => {
-  users.value = await auth?.actor.get_users();
+  let new_users = await auth?.actor.get_users();
+  users.value = new_users.filter(v => v.principal !== auth.getPrincipal);
 })()
 </script>
 
@@ -42,7 +43,7 @@ async function createConversation(user: Principal) {
         <button @click="createConversation(user.principal)">
           <img v-if="convert(user.avatar)" :src="user.avatar" :alt="user.avatar"
             class="w-[64px] h-[64px] rounded-2xl border border-white border-opacity-5" />
-          <img v-else src="https://friconix.com/png/fi-cnsuxl-user-circle.png" alt="default"
+          <img v-else src="https://cdn.yshop.pl/files/RBQ8w.png" alt="default"
             class="w-[64px] h-[64px] rounded-2xl border border-white border-opacity-5" />
         </button>
       </template>

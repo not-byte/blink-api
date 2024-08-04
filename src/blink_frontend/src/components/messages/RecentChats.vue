@@ -23,7 +23,7 @@ storage.$subscribe((_, state) => {
       <router-link v-for="message in last_messages" :key="message.timestamp"
         :to="`/messages/${message.conversation_id}`" class="w-full h-fit flex gap-3">
         <img v-if="message.user.avatar" :src="message.user.avatar" alt="" class="h-14 aspect-square" />
-        <img v-else src="https://friconix.com/png/fi-cnsuxl-user-circle.png" alt="" class="h-14 aspect-square" />
+        <img v-else src="https://cdn.yshop.pl/files/RBQ8w.png" alt="" class="h-14 aspect-square" />
         <section class="w-full h-full flex flex-col">
           <h2 class="font-semibold text-lg">{{ message.user.username }}</h2>
           <p>
