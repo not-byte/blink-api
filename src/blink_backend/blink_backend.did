@@ -48,6 +48,7 @@ type Message = record {
 
 type LastMessage = record {
     conversation_id: nat64;
+    conversation_image: opt text;
     content: text;
     timestamp: nat64;
     user: User;

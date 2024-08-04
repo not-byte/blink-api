@@ -38,6 +38,7 @@ pub struct Message {
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct LastMessage {
     pub conversation_id: u64,
+    pub conversation_image: Option<String>,
     pub content: String,
     pub timestamp: u64,
     pub user: User,
@@ -147,6 +148,13 @@ fn get_last_message(conversation_id: u64) -> Result<Option<LastMessage>, Error> 
             return Err(ErrorKind::ConversationNotFound.into());
         };
 
+        let conversation_image = conversation
+            .users
+            .iter()
+            .find(|v| v.principal != user.principal)
+            .map(|v| v.avatar.clone())
+            .unwrap_or(user.avatar.clone());
+
         if conversation.users.contains(&user) {
             Ok(conversation
                 .to_owned()
@@ -154,6 +162,7 @@ fn get_last_message(conversation_id: u64) -> Result<Option<LastMessage>, Error> 
                 .last()
                 .map(|v| LastMessage {
                     conversation_id,
+                    conversation_image,
                     content: match &v.message {
                         MessageContent::Text(text) => text.content.clone(),
                         MessageContent::Image(image) => image.name.clone(),

@@ -2,7 +2,7 @@
 import { useStorageStore } from "@/stores/storage";
 import { useAuthStore } from "@/stores/auth";
 import { Ref, ref } from "vue";
-import { getTime, trimStr } from "@/utils/util"
+import { getTime, trimStr, convert } from "@/utils/util"
 import type { LastMessage } from "@declarations/blink_backend.did";
 import { storeToRefs } from "pinia";
 
@@ -22,12 +22,13 @@ storage.$subscribe((_, state) => {
     <article class="grid gap-3">
       <router-link v-for="message in last_messages" :key="message.timestamp"
         :to="`/messages/${message.conversation_id}`" class="w-full h-fit flex gap-3">
-        <img v-if="message.user.avatar" :src="message.user.avatar" alt="" class="h-14 aspect-square" />
+        <img v-if="convert(message.conversation_image)" :src="convert(message.conversation_image)" alt=""
+          class="h-14 aspect-square" />
         <img v-else src="https://cdn.yshop.pl/files/RBQ8w.png" alt="" class="h-14 aspect-square" />
         <section class="w-full h-full flex flex-col">
           <h2 class="font-semibold text-lg">{{ message.user.username }}</h2>
           <p>
-            <template v-if="message.user.caller == auth.identity.getPrincipal()">
+            <template v-if="message.user.principal.toText() == auth.identity.getPrincipal().toText()">
               (You)
             </template>
             {{ trimStr(message.content) }}
