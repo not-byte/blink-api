@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 defineProps<{
-    title: string;
+  title: string;
 }>();
 </script>
 
 <template>
-    <header class="w-full">
-        <h3 class="text-4xl font-semibold">
-            {{ title }}
-        </h3>
-    </header>
+  <header class="w-full">
+    <h3 class="text-[6rem] lg:text-4xl font-semibold">
+      {{ title }}
+    </h3>
+  </header>
 </template>

@@ -8,11 +8,11 @@ import dayTimeTitle from "@/utils/dayTimeTitle";
 </script>
 
 <template>
-    <section class="w-full h-full flex flex-col gap-6 transition-root">
-        <HeaderComponent :title="`Good ${dayTimeTitle()}`" />
-        <SearchComponent />
-        <OnlineUsers />
-        <RecentChats />
-        <NavigationComponent />
-    </section>
+  <section class="w-full h-full flex flex-col gap-6 transition-root pb-[12rem] lg:pb-12">
+    <HeaderComponent :title="`Good ${dayTimeTitle()}`" />
+    <SearchComponent />
+    <OnlineUsers />
+    <RecentChats />
+    <NavigationComponent />
+  </section>
 </template>

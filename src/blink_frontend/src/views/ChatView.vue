@@ -52,8 +52,9 @@ function getUser(principal: Principal): string {
 <template>
   <section class="w-full h-full flex flex-col gap-6 transition-root pb-12">
     <HeaderComponent :title="conversation?.name ?? ''" />
-    <p>Status: Offline</p>
-    <article class="flex-grow flex flex-col-reverse gap-3 rounded-xl overflow-y-scroll no-scrollbar">
+    <p class="text-[2rem] lg:text-base">Status: Offline</p>
+    <article
+      class="flex-grow flex flex-col-reverse gap-6 lg:gap-3 rounded-xl overflow-y-scroll no-scrollbar mb-3 lg:mb-0">
       <div>
         <template v-for="message in conversation?.messages ?? []" :key="message.id">
           <template v-if="message.message.Text">

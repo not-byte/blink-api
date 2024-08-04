@@ -3,41 +3,41 @@
 @tailwind utilities;
 
 @layer base {
-    @font-face {
-        font-display: swap;
-        font-family: "Inter";
-        font-style: normal;
-        font-weight: 400;
-        src: url("../font/inter-v13-latin_latin-ext-regular.woff2") format("woff2");
-    }
+  @font-face {
+    font-display: swap;
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 400;
+    src: url("../font/inter-v13-latin_latin-ext-regular.woff2") format("woff2");
+  }
 
-    @font-face {
-        font-display: swap;
-        font-family: "Inter";
-        font-style: normal;
-        font-weight: 800;
-        src: url("../font/inter-v13-latin_latin-ext-800.woff2") format("woff2");
-    }
+  @font-face {
+    font-display: swap;
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 800;
+    src: url("../font/inter-v13-latin_latin-ext-800.woff2") format("woff2");
+  }
 
-    body {
-        width: 100vw;
-        height: 100vh;
-        display: grid;
-        place-content: center;
-        color: white;
-        user-select: none;
-        overflow: hidden;
-        @apply bg-rasin-black font-display;
-    }
+  body {
+    width: 100dvw;
+    height: 100dvh;
+    display: grid;
+    place-content: center;
+    color: white;
+    user-select: none;
+    overflow: hidden;
+    @apply bg-rasin-black font-display;
+  }
 }
 
 @layer utilities {
-    .no-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 
-    .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
