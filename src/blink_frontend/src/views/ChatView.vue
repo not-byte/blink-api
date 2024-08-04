@@ -50,7 +50,7 @@ function getUser(principal: Principal): string {
 </script>
 
 <template>
-  <section class="w-full h-full flex flex-col gap-6 transition-root pb-12">
+  <section class="w-full h-full flex flex-col gap-6 transition-root pb-[12rem] lg:pb-12">
     <HeaderComponent :title="conversation?.name ?? ''" />
     <p class="text-[2rem] lg:text-base">Status: Offline</p>
     <article

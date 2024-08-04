@@ -52,17 +52,19 @@ auth.$subscribe(async () => {
     </section>
     <div class="flex flex-col gap-6 transition-root relative">
       <template v-if="!hasAccount">
-        <aside class="w-full h-fit px-5 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
+        <aside
+          class="text-[2rem] lg:text-base w-full h-fit px-9 py-6 lg:px-5 lg:py-3 bg-smoke/5 backdrop-blur-sm border-2 lg:border border-smoke/10 rounded-2xl text-center">
           <input class="w-full bg-transparent outline-none placeholder:text-white" placeholder="Username" type="text"
             v-model="username" />
         </aside>
-        <aside class="w-full h-fit px-5 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
+        <aside
+          class="text-[2rem] lg:text-base w-full h-fit px-9 py-6 lg:px-5 lg:py-3 bg-smoke/5 backdrop-blur-sm border-2 lg:border border-smoke/10 rounded-2xl text-center">
           <input class="w-full bg-transparent outline-none placeholder:text-white"
             placeholder="Link to avatar (Optional)" type="text" v-model="avatar" />
         </aside>
 
         <button
-          class="w-full h-fit px-5 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl text-center"
+          class="text-[2rem] lg:text-base w-full h-fit px-9 py-6 lg:px-5 lg:py-3 bg-smoke/5 backdrop-blur-sm border-2 lg:border border-smoke/10 rounded-2xl text-center"
           @click="createUser">
           Join now
         </button>

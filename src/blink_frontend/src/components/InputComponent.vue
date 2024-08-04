@@ -26,9 +26,10 @@ async function send() {
 </script>
 
 <template>
-  <aside class="w-full h-fit px-5 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl flex gap-2">
-    <input class="w-full bg-transparent outline-none placeholder:text-white" placeholder="Enter your message"
-      type="text" v-model="message" />
-    <button @click="send">→</button>
+  <aside
+    class="w-full h-fit px-9 py-6 lg:px-5 lg:py-3 mt-2 lg:mt-0 mb-0 lg:mb-4 bg-smoke/5 backdrop-blur-sm rounded-2xl border-2 lg:border border-smoke/10 flex">
+    <input class="text-[2rem] lg:text-base w-full bg-transparent outline-none placeholder:text-white"
+      placeholder="Enter your message" type="text" />
+    <button @click="send" class="text-[2rem]">→</button>
   </aside>
 </template>
