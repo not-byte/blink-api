@@ -12,7 +12,7 @@ const storage = useStorageStore();
 const auth = useAuthStore();
 storage.$subscribe((_, state) => {
   const { getLastMessages } = storeToRefs(storage);
-  last_messages.value = getLastMessages.value;
+  last_messages.value = getLastMessages.value.sort((a, b) => b.timestamp - a.timestamp);
 });
 </script>
 
