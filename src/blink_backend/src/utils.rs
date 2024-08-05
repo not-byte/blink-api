@@ -11,7 +11,7 @@ pub trait CallerTrait {
 
 impl CallerTrait for Principal {
     fn is_anonymous(&self) -> bool {
-        *self == Principal::anonymous()
+        *self == Self::anonymous()
     }
 }
 
@@ -33,7 +33,7 @@ impl Filter<Conversation> for Vec<Conversation> {
     }
 
     /// Find all Conversations where caller exists
-    fn filter(&self, caller: User) -> Vec<Conversation> {
+    fn filter(&self, caller: User) -> Self {
         self.iter()
             .filter(|v| v.users.contains(&caller))
             .cloned()
@@ -53,7 +53,7 @@ impl Filter<Message> for Vec<Message> {
     }
 
     #[allow(unused)]
-    fn filter(&self, caller: User) -> Vec<Message> {
+    fn filter(&self, caller: User) -> Self {
         unimplemented!()
     }
 

@@ -13,7 +13,7 @@ mod utils;
 #[ic_cdk::query]
 fn greet() -> Result<String, Error> {
     let caller = anon!();
-    Ok(format!("Your PrincipalId is: {}", caller))
+    Ok(format!("Your PrincipalId is: {caller}"))
 }
 
 #[ic_cdk::query]

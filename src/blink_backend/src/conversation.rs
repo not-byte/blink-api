@@ -42,7 +42,7 @@ fn create_conversation(users_: Vec<Principal>) -> Result<u64, Error> {
 
     let mut result: Vec<User> = Vec::new();
 
-    for user in users.iter() {
+    for user in &users {
         match user.to_user() {
             Some(u) => result.push(u),
             None => return Err(ErrorKind::UserDoesNotExist.into()),
@@ -52,7 +52,6 @@ fn create_conversation(users_: Vec<Principal>) -> Result<u64, Error> {
     STATE.with_borrow_mut(|state| {
         let name = if users.len() == 2 {
             result
-                .clone()
                 .iter()
                 .find(|v| v.principal != caller)
                 .unwrap()
@@ -60,7 +59,6 @@ fn create_conversation(users_: Vec<Principal>) -> Result<u64, Error> {
                 .clone()
         } else {
             result
-                .clone()
                 .iter()
                 .take(3)
                 .map(|v| v.username.clone())
@@ -155,7 +153,7 @@ fn add_to_conversation(conversation_id: u64, principals: Vec<Principal>) -> Resu
 
         let mut users: Vec<User> = Vec::new();
 
-        for v in principals.iter() {
+        for v in &principals {
             match v.to_user_state(state.to_owned()) {
                 Some(user) => users.push(user),
                 None => return Err(ErrorKind::UserDoesNotExist.into()),
@@ -172,7 +170,7 @@ fn add_to_conversation(conversation_id: u64, principals: Vec<Principal>) -> Resu
 
         conversation.users.extend(users);
         let set: HashSet<_> = conversation.users.drain(..).collect(); // dedup
-        conversation.users.extend(set.into_iter());
+        conversation.users.extend(set);
         Ok(())
     })
 }

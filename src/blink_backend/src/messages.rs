@@ -131,7 +131,7 @@ fn get_messages(conversation_id: u64) -> Result<Conversation, Error> {
         if conversation.users.contains(&user) {
             Ok(conversation.to_owned())
         } else {
-            return Err(ErrorKind::CantAccess.into());
+            Err(ErrorKind::CantAccess.into())
         }
     })
 }
@@ -152,8 +152,7 @@ fn get_last_message(conversation_id: u64) -> Result<Option<LastMessage>, Error> 
             .users
             .iter()
             .find(|v| v.principal != user.principal)
-            .map(|v| v.avatar.clone())
-            .unwrap_or(user.avatar.clone());
+            .map_or_else(|| user.avatar.clone(), |v| v.avatar.clone());
 
         if conversation.users.contains(&user) {
             Ok(conversation
@@ -175,7 +174,7 @@ fn get_last_message(conversation_id: u64) -> Result<Option<LastMessage>, Error> 
                     // user: v.caller,
                 }))
         } else {
-            return Err(ErrorKind::CantAccess.into());
+            Err(ErrorKind::CantAccess.into())
         }
     })
 }
@@ -197,7 +196,7 @@ fn remove_message(conversation_id: u64, id: u64) -> Result<(), Error> {
             conversation.messages.remove(index);
             Ok(())
         } else {
-            return Err(ErrorKind::CantAccess.into());
+            Err(ErrorKind::CantAccess.into())
         }
     })
 }
@@ -218,12 +217,12 @@ fn update_message(conversation_id: u64, id: u64, new_message: String) -> Result<
             match v.message {
                 MessageContent::Text(ref mut text) => {
                     if v.caller == caller {
-                        text.content = new_message.clone();
+                        text.content = new_message;
                     } else {
                         return Err(ErrorKind::CantEdit.into());
                     }
                 }
-                _ => return Err(ErrorKind::CantEdit.into()),
+                MessageContent::Image(_) => return Err(ErrorKind::CantEdit.into()),
             }
         }
         Ok(())

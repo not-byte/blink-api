@@ -47,6 +47,7 @@ pub trait UserTrait {
     fn to_user(&self) -> Option<User>;
 
     /// Get the user from state
+    #[allow(clippy::wrong_self_convention)]
     fn to_user_mut(&self) -> Option<&mut User>;
 
     /// Get the user with state already provided
