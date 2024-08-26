@@ -12,4 +12,4 @@ crate-type = ["cdylib"]
 candid = "0.10"
 ic-cdk = "0.15"
 ic-cdk-timers = "0.9" # Feel free to remove this dependency if you don't need timers
-serde = { version = "1.0.204", features = ["derive"] }
+serde = { version = "1.0.209", features = ["derive"] }
